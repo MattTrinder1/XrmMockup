@@ -97,7 +97,7 @@ namespace DG.Tools.XrmMockup
 
             this.db = new XrmDb(metadata.EntityMetadata, GetOnlineProxy());
             this.snapshots = new Dictionary<string, Snapshot>();
-            this.security = new Security(this, metadata, SecurityRoles);
+            this.security = new Security(this, metadata, SecurityRoles,this.db);
             this.ServiceFactory = new MockupServiceProviderAndFactory(this);
 
             //add the additional plugin settings to the meta data
@@ -114,6 +114,17 @@ namespace DG.Tools.XrmMockup
             this.RequestHandlers = GetRequestHandlers(db);
             InitializeDB();
             this.security.InitializeSecurityRoles(db);
+
+            //persist the access team templates as they livein the db as records.
+            if (metadata.AccessTeamTemplates != null)
+            {
+                foreach (var att in metadata.AccessTeamTemplates)
+                {
+                    var create = new CreateRequest();
+                    create.Target = att;
+                    this.Execute(create, AdminUserRef);
+                }
+            }
         }
 
         private void InitializeDB()
@@ -187,8 +198,12 @@ namespace DG.Tools.XrmMockup
                 new CloseIncidentRequestHandler(this, db, metadata, security),
                 new AddMembersTeamRequestHandler(this, db, metadata, security),
                 new RemoveMembersTeamRequestHandler(this, db, metadata, security),
+#if !(XRM_MOCKUP_2011)
+                new AddUserToRecordTeamRequestHandler(this, db, metadata, security),
+                new RemoveUserFromRecordTeamRequestHandler(this, db, metadata, security),
+#endif
 #if !(XRM_MOCKUP_2011 || XRM_MOCKUP_2013)
-                new IsValidStateTransitionRequestHandler(this, db, metadata, security),
+            new IsValidStateTransitionRequestHandler(this, db, metadata, security),
                 new CalculateRollupFieldRequestHandler(this, db, metadata, security),
 #endif
 #if !(XRM_MOCKUP_2011 || XRM_MOCKUP_2013 || XRM_MOCKUP_2015)
@@ -760,6 +775,16 @@ namespace DG.Tools.XrmMockup
         internal Dictionary<string, Dictionary<AccessRights, PrivilegeDepth>> GetPrivilege(Guid principleId)
         {
             return security.GetPrincipalPrivilege(principleId);
+        }
+
+        internal SecurityRole GetSecurityRole(string roleName)
+        {
+            return security.GetSecurityRole(roleName);
+        }
+
+        internal void AddSecurityRole (SecurityRole role)
+        {
+            security.AddSecurityRole(role);
         }
 
         internal void AddPrivileges(EntityReference entRef, Dictionary<string, Dictionary<AccessRights, PrivilegeDepth>> privileges)
