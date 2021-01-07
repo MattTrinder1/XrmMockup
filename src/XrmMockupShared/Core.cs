@@ -16,6 +16,7 @@ using Microsoft.Xrm.Sdk.Metadata;
 using WorkflowExecuter;
 using DG.Tools.XrmMockup.Database;
 using Microsoft.Xrm.Sdk.Client;
+using static DG.Tools.XrmMockup.MetadataSkeleton;
 
 namespace DG.Tools.XrmMockup
 {

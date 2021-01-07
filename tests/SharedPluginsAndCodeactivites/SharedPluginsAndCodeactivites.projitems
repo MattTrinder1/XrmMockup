@@ -11,6 +11,7 @@
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)ParentPostCreatePlugin.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ChildPreCreatePlugin.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)NotePostOperationPlugin.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)BusTicketSync.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AccountCustomActivity.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AccountBothImagePlugin.cs" />

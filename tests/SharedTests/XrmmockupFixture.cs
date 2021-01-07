@@ -2,6 +2,7 @@
 using DG.Tools.XrmMockup;
 using Microsoft.Xrm.Sdk.Client;
 using System;
+using static DG.Tools.XrmMockup.MetadataSkeleton;
 
 public class XrmMockupFixture : IDisposable
 {
@@ -101,7 +102,7 @@ public class XrmMockupFixture : IDisposable
             MessageName = "Create",
             PrimaryEntity = "contact",
             Rank = 10,
-            Stage = 40 //pre op as it only updates a field name
+            Stage = 40 //post op
         }
     };
 }

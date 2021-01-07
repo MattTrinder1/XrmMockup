@@ -4,6 +4,7 @@ using DG.Tools.XrmMockup;
 using Xunit;
 using Microsoft.Crm.Sdk.Messages;
 using System.Collections.Generic;
+using static DG.Tools.XrmMockup.MetadataSkeleton;
 
 namespace DG.XrmMockupTest
 {
@@ -50,13 +51,19 @@ namespace DG.XrmMockupTest
             if (fixture.crmRealData != null)
                 orgRealDataService = fixture.crmRealData.GetAdminService();
 
-            //create an admin user for our impersonating user plugin to run as
-            var adminId = Guid.Parse("84a23551-017a-44fa-9cc1-08ee14bb97e8");
-            var admin = new Entity("systemuser");
-            admin.Id = adminId;
-            admin["internalemailaddress"] = "camstestuser1@official.mod.uk";
+            //create an admin user to run our impersonating user plugins as
+            var admin = new Entity("systemuser") { Id = Guid.Parse("3b961284-cd7a-4fa3-af7e-89802e88dd5c") };
             admin["businessunitid"] = crm.RootBusinessUnit;
+            admin["internalemailaddress"] = "camstestuser1@official.mod.uk";
             admin["islicensed"] = true;
+
+            //create an admin user for our impersonating user plugin to run as
+            //var adminId = Guid.Parse("84a23551-017a-44fa-9cc1-08ee14bb97e8");
+            //var admin = new Entity("systemuser");
+            //admin.Id = adminId;
+            //admin["internalemailaddress"] = "camstestuser1@official.mod.uk";
+            //admin["businessunitid"] = crm.RootBusinessUnit;
+            //admin["islicensed"] = true;
 
             // crm.CreateUser
 
@@ -72,7 +79,7 @@ namespace DG.XrmMockupTest
             var accessTeamTestRole = crm.CloneSecurityRole("Salesperson");
             accessTeamTestRole.Name = "AccessTeamTest";
             var contactPriv = accessTeamTestRole.Privileges["contact"];
-            var newPriv = new Dictionary<AccessRights, DG.Tools.XrmMockup.RolePrivilege>();
+            var newPriv = new Dictionary<AccessRights, Tools.XrmMockup.RolePrivilege>();
             foreach (var priv in contactPriv)
             {
                 var newP = priv.Value.Clone();
@@ -83,7 +90,7 @@ namespace DG.XrmMockupTest
             accessTeamTestRole.Privileges.Add("contact", newPriv);
 
             var accountPriv = accessTeamTestRole.Privileges["account"];
-            newPriv = new Dictionary<AccessRights, DG.Tools.XrmMockup.RolePrivilege>();
+            newPriv = new Dictionary<AccessRights, Tools.XrmMockup.RolePrivilege>();
             foreach (var priv in accountPriv)
             {
                 var newP = priv.Value.Clone();

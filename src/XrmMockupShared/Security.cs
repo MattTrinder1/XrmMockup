@@ -10,6 +10,7 @@ using System.ServiceModel;
 
 namespace DG.Tools.XrmMockup
 {
+    using static DG.Tools.XrmMockup.MetadataSkeleton;
     using AccessDepthRight = Dictionary<AccessRights, PrivilegeDepth>;
     using Privileges = Dictionary<string, Dictionary<AccessRights, PrivilegeDepth>>;
 

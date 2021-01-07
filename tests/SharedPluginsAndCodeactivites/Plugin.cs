@@ -10,10 +10,10 @@
     using Microsoft.Xrm.Sdk;
 
     // StepConfig           : className, ExecutionStage, EventOperation, LogicalName
-    // ExtendedStepConfig   : Deployment, ExecutionMode, Name, ExecutionOrder, FilteredAttributes, UserContext
+    // ExtendedStepConfig   : Deployment, ExecutionMode, Name, ExecutionOrder, FilteredAttributes, ImpersonatingUserId
     // ImageTuple           : Name, EntityAlias, ImageType, Attributes
     using StepConfig = System.Tuple<string, int, string, string>;
-    using ExtendedStepConfig = System.Tuple<int, int, string, int, string, string>;
+    using ExtendedStepConfig = System.Tuple<int, int, string, int, string, System.Guid?>;
     using ImageTuple = System.Tuple<string, string, int, string>;
     using System.Reflection;
     using static SharedPluginsAndCodeactivites.Utility.Enums;
@@ -264,7 +264,7 @@
                 yield return
                     new Tuple<StepConfig, ExtendedStepConfig, IEnumerable<ImageTuple>>(
                         new StepConfig(className, config._ExecutionStage, config._EventOperation, config._LogicalName),
-                        new ExtendedStepConfig(config._Deployment, config._ExecutionMode, config._Name, config._ExecutionOrder, config._FilteredAttributes, config._UserContext.ToString()),
+                        new ExtendedStepConfig(config._Deployment, config._ExecutionMode, config._Name, config._ExecutionOrder, config._FilteredAttributes, config._UserContext),
                         config.GetImages());
             }
         }
@@ -286,7 +286,7 @@
 
             return stepConfig;
         }
-
+       
         protected PluginStepConfig RegisterPluginStep(string entityLogicalName,EventOperation eventOperation, ExecutionStage executionStage, Action<LocalPluginContext> action)
         {
             PluginStepConfig stepConfig = new PluginStepConfig(entityLogicalName, eventOperation, executionStage);
@@ -312,5 +312,6 @@
             }
         }
         #endregion
+
     }
 }

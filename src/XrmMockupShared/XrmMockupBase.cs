@@ -12,6 +12,7 @@ using System.Runtime.CompilerServices;
 
 namespace DG.Tools.XrmMockup
 {
+    using static DG.Tools.XrmMockup.MetadataSkeleton;
     using Privileges = Dictionary<string, Dictionary<AccessRights, PrivilegeDepth>>;
 
     /// <summary>

@@ -5,16 +5,18 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace DG.Tools.XrmMockup {
+namespace DG.Tools.XrmMockup
+{
 
-    public class MetadataSkeleton {
+    public class MetadataSkeleton
+    {
         public Dictionary<string, EntityMetadata> EntityMetadata;
         public List<Entity> Currencies;
         public Entity BaseOrganization;
         public Entity RootBusinessUnit;
         public List<MetaPlugin> Plugins;
         public OptionSetMetadataBase[] OptionSets;
-        public Dictionary<string, Dictionary<int,int>> DefaultStateStatus;
+        public Dictionary<string, Dictionary<int, int>> DefaultStateStatus;
         public List<Entity> AccessTeamTemplates;
 
         public void Merge(MetadataSkeleton metadata)
@@ -42,7 +44,8 @@ namespace DG.Tools.XrmMockup {
         }
     }
 
-    public class MetaPlugin {
+    public class MetaPlugin
+    {
         public string FilteredAttributes;
         public int Mode;
         public string Name;
@@ -50,8 +53,10 @@ namespace DG.Tools.XrmMockup {
         public int Stage;
         public string MessageName;
         public string AssemblyName;
+        public string PluginTypeAssemblyName;
         public string PrimaryEntity;
         public List<MetaImage> Images;
+        public Guid? ImpersonatingUserId;
     }
 
     public class MetaImage
@@ -63,7 +68,8 @@ namespace DG.Tools.XrmMockup {
     }
 
 
-    public class RolePrivilege {
+    public class RolePrivilege
+    {
         public bool CanBeGlobal;
         public bool CanBeDeep;
         public bool CanBeLocal;
@@ -85,7 +91,8 @@ namespace DG.Tools.XrmMockup {
         }
     }
 
-    public class SecurityRole {
+    public class SecurityRole
+    {
         public Dictionary<string, Dictionary<AccessRights, RolePrivilege>> Privileges;
         public string Name;
         public EntityReference BusinessUnitId;
@@ -104,8 +111,8 @@ namespace DG.Tools.XrmMockup {
                     newV.Add(v.Key, new RolePrivilege() { AccessRight = v.Value.AccessRight, CanBeBasic = v.Value.CanBeBasic, CanBeDeep = v.Value.CanBeDeep, CanBeGlobal = v.Value.CanBeGlobal, CanBeLocal = v.Value.CanBeLocal, PrivilegeDepth = v.Value.PrivilegeDepth });
                 }
 
-                var p = new KeyValuePair<string,Dictionary< AccessRights, RolePrivilege>>(priv.Key,newV);
-                clone.Privileges.Add(p.Key,p.Value);
+                var p = new KeyValuePair<string, Dictionary<AccessRights, RolePrivilege>>(priv.Key, newV);
+                clone.Privileges.Add(p.Key, p.Value);
             }
 
             clone.Name = "Clone of " + this.Name;
@@ -117,3 +124,4 @@ namespace DG.Tools.XrmMockup {
         }
     }
 }
+

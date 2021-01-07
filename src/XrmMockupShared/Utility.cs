@@ -20,6 +20,7 @@ using Microsoft.Crm.Sdk.Messages;
 using System.IO;
 using DG.Tools.XrmMockup.Database;
 using System.Xml.Linq;
+using static DG.Tools.XrmMockup.MetadataSkeleton;
 
 namespace DG.Tools.XrmMockup
 {
