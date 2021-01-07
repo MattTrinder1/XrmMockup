@@ -36,8 +36,8 @@ namespace DG.Tools.XrmMockup.Metadata
                 this.EntityLogicalNames = GetLogicalNames(AssemblyGetter.GetAssembliesInBuildPath());
 
             // Add default entities
-            //var defaultEntities = new string[] { "businessunit", "systemuser", "transactioncurrency", "role", "systemuserroles", "teamroles", "activitypointer" };
-            var defaultEntities = new string[] { "roletemplate", "teamtemplate", "principalobjectaccess" };
+            var defaultEntities = new string[] { "businessunit", "systemuser", "transactioncurrency", "role", "systemuserroles", "teamroles", "activitypointer","roletemplate", "teamtemplate", "principalobjectaccess","team" };
+            //var defaultEntities = new string[] { "roletemplate", "teamtemplate", "principalobjectaccess" };
             foreach (var logicalName in defaultEntities)
             {
                 this.EntityLogicalNames.Add(logicalName);
