@@ -110,12 +110,15 @@ namespace DG.Tools.XrmMockup.Database {
             }
         }
 
-        internal DbRow GetDbRow(EntityReference reference, bool withReferenceCheck = true) {
+        internal DbRow GetDbRow(EntityReference reference, bool withReferenceCheck = true)
+        {
             DbRow currentDbRow = null;
 
-            if (reference?.Id != Guid.Empty) {                
+            if (reference?.Id != Guid.Empty)
+            {
                 currentDbRow = this[reference.LogicalName][reference.Id];
-                if (currentDbRow == null && OnlineProxy != null) {
+                if (currentDbRow == null && OnlineProxy != null)
+                {
                     if (!withReferenceCheck)
                         currentDbRow = DbRow.MakeDBRowRef(reference, this);
                     else
@@ -125,7 +128,8 @@ namespace DG.Tools.XrmMockup.Database {
                         currentDbRow = this[reference.LogicalName][reference.Id];
                     }
                 }
-                if (currentDbRow == null) {
+                if (currentDbRow == null)
+                {
                     throw new FaultException($"The record of type '{reference.LogicalName}' with id '{reference.Id}' " +
                         "does not exist. If you use hard-coded records from CRM, then make sure you create those records before retrieving them.");
                 }
@@ -143,7 +147,8 @@ namespace DG.Tools.XrmMockup.Database {
             }
 #endif
             // No identification given for the entity, throw error
-            else {
+            else
+            {
                 throw new FaultException($"Missing a form of identification for the desired record in order to retrieve it.");
             }
 
@@ -151,10 +156,51 @@ namespace DG.Tools.XrmMockup.Database {
         }
 
 
+        internal bool TryGetDbRow(EntityReference reference, out DbRow dbRow)
+        {
+            DbRow currentDbRow = null;
+            dbRow = null;
+
+            if (reference?.Id != Guid.Empty)
+            {
+                currentDbRow = this[reference.LogicalName][reference.Id];
+                if (currentDbRow == null)
+                {
+                    return false;
+                }
+                else
+                {
+                    dbRow = currentDbRow;
+                    return true;
+                }
+            }
+
+#if !(XRM_MOCKUP_2011 || XRM_MOCKUP_2013 || XRM_MOCKUP_2015)
+            // Try fetching with key attributes if any
+            else if (reference?.KeyAttributes?.Count > 0) {
+                currentDbRow = this[reference.LogicalName].FirstOrDefault(row => reference.KeyAttributes.All(kv => row[kv.Key] == kv.Value));
+
+                if (currentDbRow == null)
+                {
+                    return false;
+                }
+                else
+                {
+                    dbRow = currentDbRow;
+                    return true;
+                }
+            }
+#endif
+            // No identification given for the entity, throw error
+            else
+            {
+                return false;
+            }
+        }
+
         internal DbRow GetDbRow(Entity xrmEntity) {
             return GetDbRow(xrmEntity.ToEntityReferenceWithKeyAttributes());
         }
-
 
         internal DbRow GetDbRow(string logicalName, Guid id) {
             return GetDbRow(new EntityReference(logicalName, id));
@@ -168,12 +214,13 @@ namespace DG.Tools.XrmMockup.Database {
             return GetDbRow(reference).ToEntity();
         }
 
-
         #region GetOrNull
-        internal DbRow GetDbRowOrNull(EntityReference reference) {
-            if (HasRow(reference))
+        internal DbRow GetDbRowOrNull(EntityReference reference)
+        {
+            DbRow row;
+            if (TryGetDbRow(reference, out row))
             {
-                return GetDbRow(reference);
+                return row;
             }
             else
             {
@@ -181,17 +228,19 @@ namespace DG.Tools.XrmMockup.Database {
             }
         }
 
-        internal Entity GetEntityOrNull(EntityReference reference) {
-
-            if (HasRow(reference))
+        internal Entity GetEntityOrNull(EntityReference reference)
+        {
+            DbRow row;
+            if (TryGetDbRow(reference, out row))
             {
-                return GetEntity(reference);
+                return row.ToEntity();
             }
             else
             {
                 return null;
             }
         }
+
         #endregion
 
         public XrmDb Clone()

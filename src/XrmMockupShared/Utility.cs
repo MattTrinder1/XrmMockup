@@ -652,10 +652,10 @@ namespace DG.Tools.XrmMockup
 
                 case ConditionOperator.Equal:
                     if (attr == null) return false;
+                    
                     if (attr.GetType() == typeof(string))
                     {
-                        //ignore trailing whitespace and case
-                        return (attr as string).TrimEnd().Equals((ConvertTo(values.First(), attr?.GetType()) as string).TrimEnd(), StringComparison.OrdinalIgnoreCase);
+                        return (attr as string).Equals((string)ConvertTo(values.First(), attr?.GetType()), StringComparison.OrdinalIgnoreCase);
                     }
                     else
                     {
@@ -663,7 +663,7 @@ namespace DG.Tools.XrmMockup
                     }
 
                 case ConditionOperator.NotEqual:
-                    return !Matches(attr, ConditionOperator.Equal, values);
+                    return !Matches(attr,ConditionOperator.Equal, values);
 
                 case ConditionOperator.GreaterThan:
                 case ConditionOperator.GreaterEqual:
