@@ -53,7 +53,7 @@ namespace DG.Tools.XrmMockup
         public int Stage;
         public string MessageName;
         public string AssemblyName;
-        public string PluginTypeAssemblyName;
+        public string PluginAssemblyName;
         public string PrimaryEntity;
         public List<MetaImage> Images;
         public Guid? ImpersonatingUserId;
