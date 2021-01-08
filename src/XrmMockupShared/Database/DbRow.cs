@@ -86,6 +86,11 @@ namespace DG.Tools.XrmMockup.Database {
             return this[colName];
         }
 
+        public bool HasColumn(string colName)
+        {
+            return Columns.Any(x => x.Key == colName);
+        }
+
         public bool ColumnIsSet(string colName) {
             return this[colName] != null;
         }

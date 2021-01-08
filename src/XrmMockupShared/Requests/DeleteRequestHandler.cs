@@ -48,10 +48,13 @@ namespace DG.Tools.XrmMockup {
                     switch (relationshipMeta.CascadeConfiguration.Delete) {
                         case CascadeType.Cascade:
                             foreach (var relatedEntity in relatedEntities.Value.Entities) {
-                                var req = new DeleteRequest {
-                                    Target = new EntityReference(relatedEntity.LogicalName, relatedEntity.Id)
-                                };
-                                core.Execute(req, userRef, null);
+                                if (!(relatedEntity.LogicalName == "team" &&
+                                      relatedEntity.Contains("teamtype") && 
+                                      relatedEntity.GetAttributeValue<OptionSetValue>("teamtype").Value == 1))
+                                {
+                                        var req = new DeleteRequest { Target = new EntityReference(relatedEntity.LogicalName, relatedEntity.Id) };
+                                        core.Execute(req, userRef, null);
+                                }
                             }
                             break;
                         case CascadeType.RemoveLink:

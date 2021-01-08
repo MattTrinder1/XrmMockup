@@ -210,7 +210,7 @@ namespace DG.Tools.XrmMockup
             return Core.GetDbTable("team")
                         .Select(x => x.ToEntity())
                         .Where(x => x.GetAttributeValue<OptionSetValue>("teamtype").Value == 1)
-                        .Where(x => (x.GetAttributeValue<EntityReference>("regardingobjectid").Id == recordId));
+                        .Where(x => (x.Contains("regardingobjectid") && x.GetAttributeValue<EntityReference>("regardingobjectid").Id == recordId));
         }
         internal Entity AddAccessTeam(Guid teamTemplateId, EntityReference record)
         {
@@ -730,7 +730,7 @@ namespace DG.Tools.XrmMockup
                 if (entity.Contains(pcr.ReferencingAttribute) && entity[pcr.ReferencingAttribute] != null)
                 {
                     var refEntity = Core.GetDbRowOrNull(new EntityReference(pcr.ReferencedEntity, Utility.GetGuidFromReference(entity[pcr.ReferencingAttribute])));
-                    if (refEntity != null)
+                    if (refEntity != null && refEntity.HasColumn("ownerid"))
                     {
                         if (refEntity.GetColumn<DbRow>("ownerid").Id == caller.Id)
                         {
