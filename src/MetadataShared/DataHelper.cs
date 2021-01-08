@@ -161,7 +161,7 @@ namespace DG.Tools.XrmMockup.Metadata
                     Stage = pluginStep.GetAttributeValue<OptionSetValue>("stage").Value,
                     MessageName = pluginStep.GetAttributeValue<EntityReference>("sdkmessageid").Name,
                     AssemblyName = pluginStep.GetAttributeValue<EntityReference>("eventhandler").Name,
-                    PluginTypeAssemblyName = pluginStep.GetAttributeValue<AliasedValue>("plugintype.assemblyname").Value.ToString(),
+                    PluginAssemblyName = pluginStep.GetAttributeValue<AliasedValue>("plugintype.assemblyname").Value.ToString(),
                     ImpersonatingUserId = pluginStep.Contains("impersonatinguserid") ? pluginStep.GetAttributeValue<EntityReference>("impersonatinguserid").Id : (Guid?)null,
                     PrimaryEntity = pluginStep.GetAttributeValue<AliasedValue>("sdkmessagefilter.primaryobjecttypecode")?.Value as string ?? "",  // In case of AnyEntity use ""
                     Images = images.Entities
