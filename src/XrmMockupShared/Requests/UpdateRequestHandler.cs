@@ -29,7 +29,7 @@ namespace DG.Tools.XrmMockup
             if (!security.HasPermission(xrmEntity, AccessRights.WriteAccess, userRef))
             {
                 throw new FaultException($"Trying to update entity '{row.Table.TableName}'" +
-                     $", but calling user with id '{userRef.Id}' does not have write access for that entity");
+                     $", but calling user with id '{userRef.Id}' does not have write access for that entity (SecLib::AccessCheckEx2 failed)");
             }
 
             if (core.GetMockupSettings().AppendAndAppendToPrivilegeCheck.GetValueOrDefault(true))

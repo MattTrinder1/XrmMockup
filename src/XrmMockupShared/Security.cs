@@ -604,7 +604,7 @@ namespace DG.Tools.XrmMockup
             var accessTeams = Core.GetDbTable(LogicalNames.Team)
                               .Select(x => x.ToEntity())
                               .Where(x => x.GetAttributeValue<OptionSetValue>("teamtype").Value == 1)
-                              .Where(x => x.GetAttributeValue<EntityReference>("regardingobjectid").Id == entity.Id);
+                              .Where(x => x.Contains("regardingobjectid") && x.GetAttributeValue<EntityReference>("regardingobjectid").Id == entity.Id);
 
             if (!accessTeams.Any())
                 return false;

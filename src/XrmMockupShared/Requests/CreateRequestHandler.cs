@@ -59,10 +59,13 @@ namespace DG.Tools.XrmMockup
                             throw new FaultException($"Trying to create entity '{entity.LogicalName}'" +
                                 $", but the calling user with id '{userRef.Id}' does not have read access for referenced entity '{reference.LogicalName}' on attribute '{attr.Key}'");
                         }
-                        if (!security.HasPermission(reference, AccessRights.AppendToAccess, userRef))
+                        if (reference.LogicalName != "systemuser")
                         {
-                            throw new FaultException($"Trying to create entity '{entity.LogicalName}'" +
-                                $", but the calling user with id '{userRef.Id}' does not have AppendTo access for referenced entity '{reference.LogicalName}' on attribute '{attr.Key}'");
+                            if (!security.HasPermission(reference, AccessRights.AppendToAccess, userRef))
+                            {
+                                throw new FaultException($"Trying to create entity '{entity.LogicalName}'" +
+                                    $", but the calling user with id '{userRef.Id}' does not have AppendTo access for referenced entity '{reference.LogicalName}' on attribute '{attr.Key}' (SecLib::AccessCheckEx2 failed)");
+                            }
                         }
                     }
                 }

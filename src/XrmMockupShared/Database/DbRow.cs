@@ -32,8 +32,10 @@ namespace DG.Tools.XrmMockup.Database {
             }
         }
 
-        protected string DebuggerDisplay {
-            get {
+        protected string DebuggerDisplay
+        {
+            get
+            {
                 string display = Table.TableName;
 
                 var name = GetColumn<string>(Metadata.PrimaryNameAttribute);
@@ -41,6 +43,15 @@ namespace DG.Tools.XrmMockup.Database {
                 if (Id != Guid.Empty) display += $" [{Id}]";
 
                 return display;
+            }
+        }
+
+        protected string NameDisplayValue
+        {
+            get
+            {
+                var name = GetColumn<string>(Metadata.PrimaryNameAttribute);
+                return name;
             }
         }
 
@@ -195,7 +206,9 @@ namespace DG.Tools.XrmMockup.Database {
 
 
         public EntityReference ToXrmEntityReference() {
-            return new EntityReference(Table.TableName, Id);
+            var entityRef = new EntityReference(Table.TableName, Id);
+            entityRef.Name = NameDisplayValue;
+            return entityRef;
         }
 
         public DbRow Clone(DbTable table)

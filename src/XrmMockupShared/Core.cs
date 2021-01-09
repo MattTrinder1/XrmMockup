@@ -259,7 +259,7 @@ namespace DG.Tools.XrmMockup
             return entityTypeMap.ContainsKey(entityType);
         }
 
-        private Entity GetEntity(string entityType)
+        internal Entity GetEntity(string entityType)
         {
             if (HasType(entityType))
             {
@@ -562,6 +562,11 @@ namespace DG.Tools.XrmMockup
             pluginContext.BusinessUnitId = buRef.Id;
 
             Mappings.RequestToEventOperation.TryGetValue(request.GetType(), out string eventOp);
+            if (string.IsNullOrEmpty(eventOp) && request.RequestName.ToLower().Contains("_"))
+            {
+                //custom action request
+                eventOp = request.RequestName.ToLower();
+            }
 
             var entityInfo = GetEntityInfo(request);
 
@@ -584,21 +589,27 @@ namespace DG.Tools.XrmMockup
             }
 
             //perform security checks for the request
-            CheckRequestSecurity(request, userRef);
+            //CheckRequestSecurity(request, userRef);
 
-            if (settings.TriggerProcesses && entityInfo != null) {
+            if (settings.TriggerProcesses && entityInfo != null)
+            {
                 // System Pre-validation
                 pluginManager.TriggerSystem(eventOp, ExecutionStage.PreValidation, entityInfo.Item1, preImage, postImage, pluginContext, this);
                 // Pre-validation
                 pluginManager.Trigger(eventOp, ExecutionStage.PreValidation, entityInfo.Item1, preImage, postImage, pluginContext, this);
+            }
 
+            CheckRequestSecurity(request, userRef);
+
+            if (settings.TriggerProcesses && entityInfo != null)
+            {
                 // Shared variables should be moved to parent context when transitioning from 10 to 20.
                 pluginContext.ParentContext = pluginContext.Clone();
                 pluginContext.SharedVariables.Clear();
 
                 // Pre-operation
                 pluginManager.Trigger(eventOp, ExecutionStage.PreOperation, entityInfo.Item1, preImage, postImage, pluginContext, this);
-                workflowManager.Trigger(eventOp, ExecutionStage.PreOperation, entityInfo.Item1, preImage, postImage, pluginContext, this);
+                workflowManager.TriggerSync(eventOp, ExecutionStage.PreOperation, entityInfo.Item1, preImage, postImage, pluginContext, this);
 
                 // System Pre-operation
                 pluginManager.TriggerSystem(eventOp, ExecutionStage.PreOperation, entityInfo.Item1, preImage, postImage, pluginContext, this);
@@ -738,8 +749,15 @@ namespace DG.Tools.XrmMockup
             {
                 return new OrganizationResponse();
             }
-
-            throw new NotImplementedException($"Execute for the request '{request.RequestName}' has not been implemented yet.");
+            if (request.RequestName.Contains("_"))
+            {
+                return new OrganizationResponse(); 
+            }
+            else
+            {
+                throw new NotImplementedException($"Execute for the request '{request.RequestName}' has not been implemented yet.");
+            }
+            
         }
 
         private void CheckRequestSecurity(OrganizationRequest request, EntityReference userRef)
@@ -866,6 +884,10 @@ namespace DG.Tools.XrmMockup
         private Tuple<object, string, Guid> GetEntityInfo(OrganizationRequest request)
         {
             Mappings.EntityImageProperty.TryGetValue(request.GetType(), out string key);
+            if (string.IsNullOrEmpty(key) && request.RequestName.Contains("_"))
+            {
+                key = "Target";
+            }
             object obj = null;
             if (key != null)
             {
