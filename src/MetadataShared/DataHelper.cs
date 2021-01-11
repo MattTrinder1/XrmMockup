@@ -176,6 +176,11 @@ namespace DG.Tools.XrmMockup.Metadata
                         .ToList()
                 };
                 plugins.Add(metaPlugin);
+
+                if (metaPlugin.PrimaryEntity == "none")
+                {
+                    metaPlugin.PrimaryEntity = "";
+                }
             }
             return plugins;
         }
