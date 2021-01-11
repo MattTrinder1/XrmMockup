@@ -195,9 +195,9 @@ namespace DG.Tools.XrmMockup
 
             checkInfiniteRecursion(pluginContext);
 
-            var isCreate = operation.ToLower() == nameof(EventOperation.Create).ToString(); 
-            var isUpdate = operation.ToLower() == nameof(EventOperation.Update).ToString(); 
-            var isDelete = operation.ToLower() == nameof(EventOperation.Delete).ToString(); 
+            var isCreate = operation.ToLower() == nameof(EventOperation.Create).ToString().ToLower(); 
+            var isUpdate = operation.ToLower() == nameof(EventOperation.Update).ToString().ToLower(); 
+            var isDelete = operation.ToLower() == nameof(EventOperation.Delete).ToString().ToLower(); 
 
             if (!isCreate && !isUpdate && !isDelete) return;
             if (isCreate && (!workflow.GetAttributeValue<bool?>("triggeroncreate").HasValue || !workflow.GetAttributeValue<bool?>("triggeroncreate").Value)) return;
@@ -247,9 +247,9 @@ namespace DG.Tools.XrmMockup
 
             checkInfiniteRecursion(pluginContext);
 
-            var isCreate = operation.ToLower() == nameof(EventOperation.Create).ToString();
-            var isUpdate = operation.ToLower() == nameof(EventOperation.Update).ToString();
-            var isDelete = operation.ToLower() == nameof(EventOperation.Delete).ToString();
+            var isCreate = operation.ToLower() == nameof(EventOperation.Create).ToString().ToLower();
+            var isUpdate = operation.ToLower() == nameof(EventOperation.Update).ToString().ToLower();
+            var isDelete = operation.ToLower() == nameof(EventOperation.Delete).ToString().ToLower();
 
             if (!isCreate && !isUpdate && !isDelete) return false;
 
@@ -286,73 +286,6 @@ namespace DG.Tools.XrmMockup
 
         }
 
-        private void ExecuteIfMatch(Entity workflow, string operation, ExecutionStage stage,
-            object entityObject, Entity preImage, Entity postImage, PluginContext pluginContext, Core core)
-        {
-            // Check if it is supposed to execute. Returns preemptively, if it should not.
-            if (workflow.LogicalName != "workflow") return;
-            var entity = entityObject as Entity;
-            var entityRef = entityObject as EntityReference;
-
-            var guid = entity?.Id ?? entityRef.Id;
-            var logicalName = entity?.LogicalName ?? entityRef.LogicalName;
-
-
-            if (workflow.GetAttributeValue<string>("primaryentity") != "" && workflow.GetAttributeValue<string>("primaryentity") != logicalName) return;
-
-            checkInfiniteRecursion(pluginContext);
-
-            var isCreate = operation.ToLower() == nameof(EventOperation.Create).ToString(); 
-            var isUpdate = operation.ToLower() == nameof(EventOperation.Update).ToString();
-            var isDelete = operation.ToLower() == nameof(EventOperation.Delete).ToString();
-
-            if (!isCreate && !isUpdate && !isDelete) return;
-
-            if (isCreate && (!workflow.GetAttributeValue<bool?>("triggeroncreate").HasValue || !workflow.GetAttributeValue<bool?>("triggeroncreate").Value)) return;
-            if (isDelete && (!workflow.GetAttributeValue<bool?>("triggerondelete").HasValue || !workflow.GetAttributeValue<bool?>("triggerondelete").Value)) return;
-            var triggerFields = new HashSet<string>();
-            if (workflow.GetAttributeValue<string>("triggeronupdateattributelist") != null)
-            {
-                foreach (var field in workflow.GetAttributeValue<string>("triggeronupdateattributelist").Split(','))
-                {
-                    triggerFields.Add(field);
-                }
-            }
-            if (isUpdate && (
-                workflow.GetAttributeValue<string>("triggeronupdateattributelist") == null ||
-                workflow.GetAttributeValue<string>("triggeronupdateattributelist") == "" ||
-                !entity.Attributes.Any(a => workflow.GetAttributeValue<string>("triggeronupdateattributelist").Split(',').Any(f => a.Key == f)))) return;
-
-            var thisStage = isCreate ? workflow.GetOptionSetValue<workflow_stage>("createstage") :
-                (isDelete ? workflow.GetOptionSetValue<workflow_stage>("deletestage") : workflow.GetOptionSetValue<workflow_stage>("updatestage"));
-            if (thisStage == null)
-            {
-                thisStage = workflow_stage.Postoperation;
-            }
-
-            if ((int)thisStage != (int)stage) return;
-
-            var thisPluginContext = createPluginContext(pluginContext, workflow, thisStage, guid, logicalName);
-
-            var parsedWorkflow = ParseWorkflow(workflow);
-            if (parsedWorkflow == null) return;
-
-            WorkflowTree postExecution = null;
-            if (thisStage == workflow_stage.Preoperation)
-            {
-                postExecution = ExecuteWorkflow(parsedWorkflow, preImage.CloneEntity(), thisPluginContext, core);
-            }
-            else
-            {
-                postExecution = ExecuteWorkflow(parsedWorkflow, postImage.CloneEntity(), thisPluginContext, core);
-            }
-
-            if (postExecution.Variables["Wait"] != null)
-            {
-                waitingWorkflows.Add(postExecution.Variables["Wait"] as WaitInfo);
-            }
-        }
-
         private void Execute(Entity workflow, string operation, object entityObject, Entity preImage, Entity postImage, PluginContext pluginContext, Core core)
         {
             // Check if it is supposed to execute. Returns preemptively, if it should not.
@@ -364,9 +297,9 @@ namespace DG.Tools.XrmMockup
 
             checkInfiniteRecursion(pluginContext);
 
-            var isCreate = operation.ToLower() == nameof(EventOperation.Create).ToString();
-            var isUpdate = operation.ToLower() == nameof(EventOperation.Update).ToString();
-            var isDelete = operation.ToLower() == nameof(EventOperation.Delete).ToString();
+            var isCreate = operation.ToLower() == nameof(EventOperation.Create).ToString().ToLower();
+            var isUpdate = operation.ToLower() == nameof(EventOperation.Update).ToString().ToLower();
+            var isDelete = operation.ToLower() == nameof(EventOperation.Delete).ToString().ToLower();
 
 
             var triggerFields = new HashSet<string>();
