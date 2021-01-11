@@ -160,7 +160,6 @@ namespace DG.Tools.XrmMockup {
                             .Invoke(plugin, new object[] { provider });
                         };
                     }
-
                 }
             }
 
