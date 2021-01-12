@@ -38,19 +38,12 @@ namespace DG.Tools.XrmMockup {
             var rows = db.GetDBEntityRows(queryExpr.EntityName);
             if (db[queryExpr.EntityName].Count() > 0)
             {
-#if !(XRM_MOCKUP_2011 || XRM_MOCKUP_2013)
-                for (int i=0; i<rows.Count(); i++)
-                {
-                    core.ExecuteCalculatedFields(rows.ToList()[i]);
-                }
-#endif
                 foreach (var row in rows)
                 {
                     var entity = row.ToEntity();
 
                     var toAdd = core.GetStronglyTypedEntity(entity, row.Metadata, null);
 
-                    Utility.SetFormmattedValues(db, toAdd, row.Metadata);
 
                     if (queryExpr.LinkEntities.Count > 0) {
                         foreach (var linkEntity in queryExpr.LinkEntities) {
@@ -61,11 +54,25 @@ namespace DG.Tools.XrmMockup {
                         }
                     } else if(Utility.MatchesCriteria(toAdd, queryExpr.Criteria)) {
                         collection.Entities.Add(toAdd);
+
                     }
                 }
             }
             var filteredEntities = new EntityCollection();
             filteredEntities.Entities.AddRange(collection.Entities.Where(e => security.HasPermission(e, AccessRights.ReadAccess, userRef)));
+
+            var entityMetadata = metadata.EntityMetadata[queryExpr.EntityName];
+            foreach (var entity in filteredEntities.Entities)
+            {
+                Utility.SetFormmattedValues(db, entity,entityMetadata);
+            }
+#if !(XRM_MOCKUP_2011 || XRM_MOCKUP_2013)
+            for (int i = 0; i < filteredEntities.Entities.Count(); i++)
+            {
+                core.ExecuteCalculatedFields(filteredEntities.Entities[i],entityMetadata);
+            }
+#endif
+
 
             var orders = queryExpr.Orders;
             var orderedCollection = new EntityCollection();

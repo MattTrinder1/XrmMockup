@@ -1026,9 +1026,9 @@ namespace DG.Tools.XrmMockup
         }
 
 #if !(XRM_MOCKUP_2011 || XRM_MOCKUP_2013)
-        internal void ExecuteCalculatedFields(DbRow row)
+        internal void ExecuteCalculatedFields(Entity entity,EntityMetadata entityMetadata)
         {
-            var attributes = row.Metadata.Attributes.Where(
+            var attributes = entityMetadata.Attributes.Where(
                 m => m.SourceType == 1 && !(m is MoneyAttributeMetadata && m.LogicalName.EndsWith("_base")));
 
             foreach (var attr in attributes)
@@ -1050,7 +1050,7 @@ namespace DG.Tools.XrmMockup
                 }
                 var tree = WorkflowConstructor.ParseCalculated(definition);
                 var factory = this.ServiceFactory;
-                tree.Execute(row.ToEntity().CloneEntity(row.Metadata, new ColumnSet(true)), this.TimeOffset, this.GetWorkflowService(),
+                tree.Execute(entity.CloneEntity(entityMetadata, new ColumnSet(true)), this.TimeOffset, this.GetWorkflowService(),
                     factory, factory.GetService(typeof(ITracingService)) as ITracingService,true);
             }
         }

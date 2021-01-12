@@ -131,9 +131,13 @@ namespace DG.Tools.XrmMockup {
             }
             else
             { // Retrieve registration from CRM metadata
-                var metaSteps = plugins.Where(x => x.AssemblyName == basePluginType.FullName 
+                var with = plugins.Where(x=> !string.IsNullOrEmpty(x.PluginAssemblyName));
+                var withOut = plugins.Where(x=> string.IsNullOrEmpty(x.PluginAssemblyName));
+                var metaStepsWith = with.Where(x => x.AssemblyName == basePluginType.FullName
                                                     &&
                                                     x.PluginAssemblyName == basePluginType.Assembly.GetName().Name).ToList();
+                var metaStepsWithout = withOut.Where(x => x.AssemblyName == basePluginType.FullName).ToList();
+                var metaSteps = metaStepsWith.Union(metaStepsWithout).ToList();
                 if (metaSteps == null || metaSteps.Count == 0)
                 {
                     throw new MockupException($"Unknown plugin '{basePluginType.FullName}', please use DAXIF registration or make sure the plugin is uploaded to CRM.");
