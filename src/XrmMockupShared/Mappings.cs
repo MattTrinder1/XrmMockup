@@ -46,8 +46,10 @@ namespace DG.Tools.XrmMockup {
             { typeof(UpdateRequest), nameof(EventOperation.Update).ToLower() },
             { typeof(WinOpportunityRequest), nameof(EventOperation.Win).ToLower() },
             { typeof(LoseOpportunityRequest), nameof(EventOperation.Lose).ToLower() },
+#if !XRM_MOCKUP_2011
             { typeof(AddUserToRecordTeamRequest), nameof(EventOperation.AddUserToRecordTeam).ToLower() },
             { typeof(RemoveUserFromRecordTeamRequest), nameof(EventOperation.RemoveUserFromRecordTeam).ToLower() },
+#endif
 
         };
 
