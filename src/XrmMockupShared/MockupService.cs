@@ -61,7 +61,7 @@ namespace DG.Tools.XrmMockup {
         /// <returns></returns>
         public Guid Create(Entity entity) {
             var req = new CreateRequest();
-            req.Target = entity;
+            req.Target = entity.CloneEntity();
             var resp = SendRequest<CreateResponse>(req);
             return resp.id;
         }

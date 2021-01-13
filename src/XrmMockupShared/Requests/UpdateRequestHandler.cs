@@ -47,18 +47,27 @@ namespace DG.Tools.XrmMockup
                     }
                 }
 
+                var currentVersion = row.ToEntity();
+
                 foreach (var attr in references)
                 {
-                    var reference = attr.Value as EntityReference;
-                    if (settings.ServiceRole == MockupServiceSettings.Role.UI && !security.HasPermission(reference, AccessRights.ReadAccess, userRef))
+                    if (!currentVersion.Contains(attr.Key)
+                        ||
+                        (currentVersion[attr.Key] as EntityReference).Id != (attr.Value as EntityReference).Id)
                     {
-                        throw new FaultException($"Trying to create entity '{xrmEntity.LogicalName}'" +
-                            $", but the calling user with id '{userRef.Id}' does not have read access for referenced entity '{reference.LogicalName}' on attribute '{attr.Key}' (SecLib::AccessCheckEx2 failed)");
-                    }
-                    if (!security.HasPermission(reference, AccessRights.AppendToAccess, userRef))
-                    {
-                        throw new FaultException($"Trying to create entity '{xrmEntity.LogicalName}'" +
-                            $", but the calling user with id '{userRef.Id}' does not have AppendTo access for referenced entity '{reference.LogicalName}' on attribute '{attr.Key}' (SecLib::AccessCheckEx2 failed)");
+
+
+                        var reference = attr.Value as EntityReference;
+                        if (settings.ServiceRole == MockupServiceSettings.Role.UI && !security.HasPermission(reference, AccessRights.ReadAccess, userRef))
+                        {
+                            throw new FaultException($"Trying to create entity '{xrmEntity.LogicalName}'" +
+                                $", but the calling user with id '{userRef.Id}' does not have read access for referenced entity '{reference.LogicalName}' on attribute '{attr.Key}' (SecLib::AccessCheckEx2 failed)");
+                        }
+                        if (!security.HasPermission(reference, AccessRights.AppendToAccess, userRef))
+                        {
+                            throw new FaultException($"Trying to create entity '{xrmEntity.LogicalName}'" +
+                                $", but the calling user with id '{userRef.Id}' does not have AppendTo access for referenced entity '{reference.LogicalName}' on attribute '{attr.Key}' (SecLib::AccessCheckEx2 failed)");
+                        }
                     }
                 }
             }

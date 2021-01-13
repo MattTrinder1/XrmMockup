@@ -36,6 +36,18 @@ namespace DG.Tools.XrmMockup {
             var collection = new EntityCollection();
             db.PrefillDBWithOnlineData(queryExpr);
             var rows = db.GetDBEntityRows(queryExpr.EntityName);
+
+            var entityMetadata = metadata.EntityMetadata[queryExpr.EntityName];
+
+#if !(XRM_MOCKUP_2011 || XRM_MOCKUP_2013)
+            for (int i = 0; i < rows.Count(); i++)
+            {
+                core.ExecuteCalculatedFields(rows.ToList()[i].ToEntity(), entityMetadata);
+                //get the rows again to include the calulated values
+            }
+            rows = db.GetDBEntityRows(queryExpr.EntityName);
+#endif
+
             if (db[queryExpr.EntityName].Count() > 0)
             {
                 foreach (var row in rows)
@@ -61,17 +73,10 @@ namespace DG.Tools.XrmMockup {
             var filteredEntities = new EntityCollection();
             filteredEntities.Entities.AddRange(collection.Entities.Where(e => security.HasPermission(e, AccessRights.ReadAccess, userRef)));
 
-            var entityMetadata = metadata.EntityMetadata[queryExpr.EntityName];
             foreach (var entity in filteredEntities.Entities)
             {
                 Utility.SetFormmattedValues(db, entity,entityMetadata);
             }
-#if !(XRM_MOCKUP_2011 || XRM_MOCKUP_2013)
-            for (int i = 0; i < filteredEntities.Entities.Count(); i++)
-            {
-                core.ExecuteCalculatedFields(filteredEntities.Entities[i],entityMetadata);
-            }
-#endif
 
 
             var orders = queryExpr.Orders;

@@ -130,7 +130,7 @@ namespace DG.Tools.XrmMockup.Database {
                 }
                 if (currentDbRow == null)
                 {
-                    throw new FaultException($"The record of type '{reference.LogicalName}' with id '{reference.Id}' " +
+                    throw new FaultException($"The record of type {reference.LogicalName} with Id '{reference.Id}' " +
                         "does not exist. If you use hard-coded records from CRM, then make sure you create those records before retrieving them.");
                 }
             }
