@@ -32,7 +32,7 @@ namespace DG.XrmMockupTest
             }
             catch (Exception ex)
             {
-                Assert.Equal(ex.Message, $"The record of type '{contact.LogicalName}' with id '{contact.Id}' does not exist. If you use hard-coded records from CRM, then make sure you create those records before retrieving them.");
+                Assert.StartsWith($"The record of type {contact.LogicalName} with Id '{contact.Id}' does not exist.", ex.Message);
             }
 
             crm.RestoreToSnapshot("test1");
@@ -81,7 +81,7 @@ namespace DG.XrmMockupTest
             }
             catch (Exception ex)
             {
-                Assert.Equal(ex.Message, $"The record of type '{contactP.LogicalName}' with id '{contactP.Id}' does not exist. If you use hard-coded records from CRM, then make sure you create those records before retrieving them.");
+                Assert.StartsWith($"The record of type {contactP.LogicalName} with Id '{contactP.Id}' does not exist.", ex.Message);
             }
 
             crm.RestoreToSnapshot("test2");
@@ -95,7 +95,7 @@ namespace DG.XrmMockupTest
             }
             catch (Exception ex)
             {
-                Assert.Equal(ex.Message, $"The record of type '{contactJ.LogicalName}' with id '{contactJ.Id}' does not exist. If you use hard-coded records from CRM, then make sure you create those records before retrieving them.");
+                Assert.StartsWith($"The record of type {contactJ.LogicalName} with Id '{contactJ.Id}' does not exist.", ex.Message);
             }
         }
 

@@ -51,10 +51,10 @@ namespace DG.Tools.XrmMockup
 
                 foreach (var attr in references)
                 {
-                    if (!currentVersion.Contains(attr.Key)
-                        ||
-                        (currentVersion[attr.Key] as EntityReference).Id != (attr.Value as EntityReference).Id)
-                    {
+                   // if (!currentVersion.Contains(attr.Key)
+                   //     ||
+                   //     (currentVersion[attr.Key] as EntityReference).Id != (attr.Value as EntityReference).Id)
+                   // {
 
 
                         var reference = attr.Value as EntityReference;
@@ -68,7 +68,7 @@ namespace DG.Tools.XrmMockup
                             throw new FaultException($"Trying to create entity '{xrmEntity.LogicalName}'" +
                                 $", but the calling user with id '{userRef.Id}' does not have AppendTo access for referenced entity '{reference.LogicalName}' on attribute '{attr.Key}' (SecLib::AccessCheckEx2 failed)");
                         }
-                    }
+                    //}
                 }
             }
         }
