@@ -30,6 +30,10 @@ namespace DG.Tools.XrmMockup {
         {
         }
 
+        virtual internal void PreExecute(OrganizationRequest orgRequest, EntityReference userRef)
+        {
+        }
+
         public static T MakeRequest<T>(OrganizationRequest req) where T : OrganizationRequest {
             var typedReq = Activator.CreateInstance<T>();
             if (req.RequestName != typedReq.RequestName) {

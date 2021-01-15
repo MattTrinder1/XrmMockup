@@ -16,6 +16,31 @@ namespace DG.Tools.XrmMockup
     {
         internal CreateRequestHandler(Core core, XrmDb db, MetadataSkeleton metadata, Security security) : base(core, db, metadata, security, "Create") { }
 
+        internal override void PreExecute(OrganizationRequest orgRequest, EntityReference userRef)
+        {
+            var request = MakeRequest<CreateRequest>(orgRequest);
+            var entity = request.Target;
+            var entityMetadata = metadata.EntityMetadata.GetMetadata(entity.LogicalName);
+            
+            if (Utility.IsValidAttribute("createdon", entityMetadata))
+            {
+                entity["createdon"] = DateTime.UtcNow.Add(core.TimeOffset);
+            }
+            if (Utility.IsValidAttribute("createdby", entityMetadata))
+            {
+                entity["createdby"] = userRef;
+            }
+
+            if (Utility.IsValidAttribute("modifiedon", entityMetadata))
+            {
+                entity["modifiedon"] = entity["createdon"];
+            }
+            if (Utility.IsValidAttribute("modifiedby", entityMetadata))
+            {
+                entity["modifiedby"] = entity["createdby"];
+            }
+        }
+
         internal override void CheckSecurity(OrganizationRequest orgRequest, EntityReference userRef)
         {
             var request = MakeRequest<CreateRequest>(orgRequest);
@@ -166,21 +191,6 @@ namespace DG.Tools.XrmMockup
                 }
             }
 
-            if (Utility.IsValidAttribute("createdon", entityMetadata))
-            {
-                clonedEntity["createdon"] = DateTime.UtcNow.Add(core.TimeOffset);
-            }
-            if (Utility.IsValidAttribute("createdby", entityMetadata))
-            {
-                clonedEntity["createdby"] = userRef;
-            }
-
-            if (Utility.IsValidAttribute("modifiedon", entityMetadata) &&
-                Utility.IsValidAttribute("modifiedby", entityMetadata))
-            {
-                clonedEntity["modifiedon"] = clonedEntity["createdon"];
-                clonedEntity["modifiedby"] = clonedEntity["createdby"];
-            }
 
             var owner = userRef;
             if (clonedEntity.Attributes.ContainsKey("ownerid"))

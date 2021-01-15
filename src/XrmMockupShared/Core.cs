@@ -594,8 +594,6 @@ namespace DG.Tools.XrmMockup
                     primaryRef.Id = preImage.Id;
             }
 
-            //perform security checks for the request
-            //CheckRequestSecurity(request, userRef);
 
             if (settings.TriggerProcesses && entityInfo != null)
             {
@@ -606,6 +604,7 @@ namespace DG.Tools.XrmMockup
             }
 
             CheckRequestSecurity(request, userRef);
+            PreExecute(request, userRef);
 
             if (settings.TriggerProcesses && entityInfo != null)
             {
@@ -774,8 +773,19 @@ namespace DG.Tools.XrmMockup
                 handler.CheckSecurity(request, userRef);
             }
             return;
-            
+
             throw new NotImplementedException($"CheckRequestSecurity for the request '{request.RequestName}' has not been implemented yet.");
+        }
+        private void PreExecute(OrganizationRequest request, EntityReference userRef)
+        {
+            var handler = RequestHandlers.FirstOrDefault(x => x.HandlesRequest(request.RequestName));
+            if (handler != null)
+            {
+                handler.PreExecute(request, userRef);
+            }
+            return;
+
+            throw new NotImplementedException($"PreExecute for the request '{request.RequestName}' has not been implemented yet.");
         }
 
         private string RequestNameToMessageName(string requestName)
