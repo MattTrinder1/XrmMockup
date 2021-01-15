@@ -624,7 +624,7 @@ namespace DG.Tools.XrmMockup
                 return money.Value;
 
             else if (obj is AliasedValue aliasedValue)
-                return aliasedValue.Value;
+                return ConvertToComparableObject(aliasedValue.Value);
 
             else if (obj is OptionSetValue optionSetValue)
                 return optionSetValue.Value;
@@ -670,7 +670,7 @@ namespace DG.Tools.XrmMockup
 
                 case ConditionOperator.Equal:
                     if (attr == null) return false;
-                    
+
                     if (attr.GetType() == typeof(string))
                     {
                         return (attr as string).Equals((string)ConvertTo(values.First(), attr?.GetType()), StringComparison.OrdinalIgnoreCase);
@@ -731,6 +731,32 @@ namespace DG.Tools.XrmMockup
                     return values.Contains(attr);
                 case ConditionOperator.NotIn:
                     return !values.Contains(attr);
+                case ConditionOperator.BeginsWith:
+                    if (attr == null) return false;
+
+                    if (attr.GetType() == typeof(string))
+                    {
+                        return (attr as string).StartsWith((string)ConvertTo(values.First(), attr?.GetType()), StringComparison.OrdinalIgnoreCase);
+                    }
+                    else
+                    {
+                        throw new NotImplementedException($"The ConditionOperator '{op}' is not valid for anything other than string yet.");
+                    }
+                case ConditionOperator.DoesNotBeginWith:
+                    return !Matches(attr, ConditionOperator.BeginsWith, values);
+                case ConditionOperator.EndsWith:
+                    if (attr == null) return false;
+
+                    if (attr.GetType() == typeof(string))
+                    {
+                        return (attr as string).EndsWith((string)ConvertTo(values.First(), attr?.GetType()), StringComparison.OrdinalIgnoreCase);
+                    }
+                    else
+                    {
+                        throw new NotImplementedException($"The ConditionOperator '{op}' is not valid for anything other than string yet.");
+                    }
+                case ConditionOperator.DoesNotEndWith:
+                    return !Matches(attr, ConditionOperator.EndsWith, values);
                 default:
                     throw new NotImplementedException($"The ConditionOperator '{op}' has not been implemented yet.");
             }

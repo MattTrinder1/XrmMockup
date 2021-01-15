@@ -32,6 +32,20 @@ namespace DG.Tools.XrmMockup
                      $", but calling user with id '{userRef.Id}' does not have write access for that entity (SecLib::AccessCheckEx2 failed)");
             }
 
+            var currentVersion = row.ToEntity();
+
+#if !(XRM_MOCKUP_2011 || XRM_MOCKUP_2013 || XRM_MOCKUP_2015)
+            var ownerRef = request.Target.GetAttributeValue<EntityReference>("ownerid");
+            if (ownerRef != null)
+            {
+                if (currentVersion.Contains("ownerid") && request.Target.Contains("ownerid") 
+                    &&  currentVersion.GetAttributeValue<EntityReference>("ownerid").Id 
+                    != request.Target.GetAttributeValue<EntityReference>("ownerid").Id)
+                
+                security.CheckAssignPermission(xrmEntity, ownerRef, userRef);
+            }
+#endif
+
             if (core.GetMockupSettings().AppendAndAppendToPrivilegeCheck.GetValueOrDefault(true))
             {
                 var references = entity.Attributes
@@ -47,14 +61,15 @@ namespace DG.Tools.XrmMockup
                     }
                 }
 
-                var currentVersion = row.ToEntity();
-
+                
                 foreach (var attr in references)
                 {
-                   // if (!currentVersion.Contains(attr.Key)
-                   //     ||
-                   //     (currentVersion[attr.Key] as EntityReference).Id != (attr.Value as EntityReference).Id)
-                   // {
+                    if ((!currentVersion.Contains(attr.Key))
+                         ||
+                         (currentVersion.Contains(attr.Key) && currentVersion[attr.Key] == null)
+                        ||
+                        (currentVersion[attr.Key] as EntityReference).Id != (attr.Value as EntityReference).Id)
+                   {
 
 
                         var reference = attr.Value as EntityReference;
@@ -65,10 +80,10 @@ namespace DG.Tools.XrmMockup
                         }
                         if (!security.HasPermission(reference, AccessRights.AppendToAccess, userRef))
                         {
-                            throw new FaultException($"Trying to create entity '{xrmEntity.LogicalName}'" +
+                            throw new FaultException($"Trying to update entity '{xrmEntity.LogicalName}'" +
                                 $", but the calling user with id '{userRef.Id}' does not have AppendTo access for referenced entity '{reference.LogicalName}' on attribute '{attr.Key}' (SecLib::AccessCheckEx2 failed)");
                         }
-                    //}
+                    }
                 }
             }
         }
@@ -110,12 +125,6 @@ namespace DG.Tools.XrmMockup
             var xrmEntity = row.ToEntity();
 
             var ownerRef = request.Target.GetAttributeValue<EntityReference>("ownerid");
-#if !(XRM_MOCKUP_2011 || XRM_MOCKUP_2013 || XRM_MOCKUP_2015)
-            if (ownerRef != null)
-            {
-                security.CheckAssignPermission(xrmEntity, ownerRef, userRef);
-            }
-#endif
 
             var updEntity = request.Target.CloneEntity(row.Metadata, new ColumnSet(true));
 
@@ -196,10 +205,16 @@ namespace DG.Tools.XrmMockup
 
             if (ownerRef != null)
             {
-                Utility.SetOwner(db, security, metadata, xrmEntity, ownerRef);
+                if (xrmEntity.Contains("ownerid") && request.Target.Contains("ownerid")
+                    && xrmEntity.GetAttributeValue<EntityReference>("ownerid").Id
+                    != request.Target.GetAttributeValue<EntityReference>("ownerid").Id)
+                {
+
+                    Utility.SetOwner(db, security, metadata, xrmEntity, ownerRef);
 #if !(XRM_MOCKUP_2011 || XRM_MOCKUP_2013 || XRM_MOCKUP_2015)
-                security.CascadeOwnerUpdate(xrmEntity, userRef, ownerRef);
+                    security.CascadeOwnerUpdate(xrmEntity, userRef, ownerRef);
 #endif
+                }
             }
             
             if (Utility.Activities.Contains(xrmEntity.LogicalName))
