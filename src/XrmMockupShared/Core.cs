@@ -1073,5 +1073,10 @@ namespace DG.Tools.XrmMockup
             return metadata.EntityMetadata[entityLogicalName];
         }
 
+        internal void ResetTable(string tableName)
+        {
+            db.ResetTable(tableName);
+        }
+
     }
 }

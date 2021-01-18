@@ -9,12 +9,15 @@ using Microsoft.Crm.Sdk.Messages;
 using System.ServiceModel;
 using Microsoft.Xrm.Sdk.Metadata;
 using DG.Tools.XrmMockup.Database;
+using System.Diagnostics;
 
 namespace DG.Tools.XrmMockup {
     internal class RetrieveMultipleRequestHandler : RequestHandler {
         internal RetrieveMultipleRequestHandler(Core core, XrmDb db, MetadataSkeleton metadata, Security security) : base(core, db, metadata, security, "RetrieveMultiple") { }
 
         internal override OrganizationResponse Execute(OrganizationRequest orgRequest, EntityReference userRef) {
+
+            
             var request = MakeRequest<RetrieveMultipleRequest>(orgRequest);
             var queryExpr = request.Query as QueryExpression;
             var fetchExpr = request.Query as FetchExpression;
@@ -32,10 +35,17 @@ namespace DG.Tools.XrmMockup {
                 throw new FaultException("The 'RetrieveMultiple' method does not support entities of type 'none'");
             }
 
+            Console.WriteLine($"starting RetrieveMultiple for entity {queryExpr.EntityName}");
+            var sw = new Stopwatch();
+            sw.Start();
+
+
             FillAliasIfEmpty(queryExpr);
             var collection = new EntityCollection();
             db.PrefillDBWithOnlineData(queryExpr);
             var rows = db.GetDBEntityRows(queryExpr.EntityName);
+
+            Console.WriteLine($"\t row count : {rows.Count().ToString()}");
 
             var entityMetadata = metadata.EntityMetadata[queryExpr.EntityName];
 
@@ -131,6 +141,9 @@ namespace DG.Tools.XrmMockup {
             var resp = new RetrieveMultipleResponse();
 
             resp.Results["EntityCollection"] = colToReturn;
+            Console.WriteLine($"\tRetrieveMultiple ran in {sw.ElapsedMilliseconds.ToString()}");
+
+
             return resp;
         }
 
