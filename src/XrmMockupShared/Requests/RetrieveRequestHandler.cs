@@ -44,7 +44,10 @@ namespace DG.Tools.XrmMockup {
 
 #if !(XRM_MOCKUP_2011 || XRM_MOCKUP_2013)
             core.ExecuteCalculatedFields(entity, row.Metadata);
+            row = db.GetDbRow(request.Target);
+            entity = core.GetStronglyTypedEntity(row.ToEntity(), row.Metadata, request.ColumnSet);
 #endif
+
 
             Utility.SetFormmattedValues(db, entity, row.Metadata);
 
