@@ -1066,6 +1066,11 @@ namespace WorkflowExecuter
                 {
                     attr = attr.ToString();
                 }
+                else if (attr is DateTime)
+                {
+                    // TODO: should respect user format preferences
+                    attr = attr.ToString();
+                }
                 else if (attr != null && !(attr is string))
                 {
                     throw new InvalidCastException($"Cannot convert {attr.GetType().Name} to {TargetType}");

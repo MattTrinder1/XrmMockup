@@ -140,7 +140,7 @@ namespace DG.Tools.XrmMockup {
                 var metaSteps = metaStepsWith.Union(metaStepsWithout).ToList();
                 if (metaSteps == null || metaSteps.Count == 0)
                 {
-                    throw new MockupException($"Unknown plugin '{basePluginType.FullName}', please use DAXIF registration or make sure the plugin is uploaded to CRM.");
+                    //throw new MockupException($"Unknown plugin '{basePluginType.FullName}', please use DAXIF registration or make sure the plugin is uploaded to CRM.");
                 }
 
                 foreach(var metaStep in metaSteps) { 

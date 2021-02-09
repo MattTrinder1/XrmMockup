@@ -54,7 +54,7 @@ namespace DG.Tools.XrmMockup.Metadata
             }
         }
 
-        public MetadataSkeleton GetMetadata(string path)
+        public MetadataSkeleton GetMetadata()
         {
             var skeleton = new MetadataSkeleton();
 
