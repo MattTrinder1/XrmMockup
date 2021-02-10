@@ -166,6 +166,12 @@ namespace DG.Tools.XrmMockup
                 Utility.SetFullName(metadata, updEntity);
             }
 
+            //check if the owner has changed before setting the attributes
+            var ownerChanged = xrmEntity.Contains("ownerid") && request.Target.Contains("ownerid")
+                                    && xrmEntity.GetAttributeValue<EntityReference>("ownerid").Id
+                                    != request.Target.GetAttributeValue<EntityReference>("ownerid").Id;
+
+
             updEntity.Attributes
                 .Where(x => x.Value is string && x.Value != null && string.IsNullOrEmpty((string)x.Value))
                 .ToList()
@@ -205,9 +211,7 @@ namespace DG.Tools.XrmMockup
 
             if (ownerRef != null)
             {
-                if (xrmEntity.Contains("ownerid") && request.Target.Contains("ownerid")
-                    && xrmEntity.GetAttributeValue<EntityReference>("ownerid").Id
-                    != request.Target.GetAttributeValue<EntityReference>("ownerid").Id)
+                if (ownerChanged)
                 {
 
                     Utility.SetOwner(db, security, metadata, xrmEntity, ownerRef);

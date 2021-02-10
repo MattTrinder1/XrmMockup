@@ -80,6 +80,8 @@ namespace DG.Tools.XrmMockup.Database {
             var currentDbRow = GetDbRow(xrmEntity);
 
             var dbEntity = DbRow.FromEntity(xrmEntity, withReferenceChecks ? this : null);
+            //preserve the sequence value
+            dbEntity.Sequence = currentDbRow.Sequence;
             this[dbEntity.Table.TableName][dbEntity.Id] = dbEntity;
         }
 
