@@ -16,7 +16,7 @@
     <RepositoryUrl>https://github.com/MattTrinder1/XrmMockup</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
-    <Version>1.0.4</Version>
+    <Version>1.0.5</Version>
     <Product>BleedingEdgeXrmMockup365</Product>
     <PackageId>BleedingEdgeXrmMockup365</PackageId>
   </PropertyGroup>
@@ -48,6 +48,15 @@
   <ItemGroup>
     <Content Include="..\MetadataGen\MetadataGenerator365\bin\Release\$(TargetFramework)\MetadataGenerator365.exe" Pack="true" PackagePath="content\net462\Metadata" />
     <Content Include="..\MetadataGen\MetadataGenerator365\bin\Release\$(TargetFramework)\MetadataGenerator365.exe.config" Pack="true" PackagePath="content\net462\Metadata" />
+    <Content Include="..\MetadataGen\MetadataGenerator365\bin\Release\$(TargetFramework)\Microsoft.Crm.Sdk.Proxy.dll" Pack="true" PackagePath="content\net462\Metadata" />
+    <Content Include="..\MetadataGen\MetadataGenerator365\bin\Release\$(TargetFramework)\MeMicrosoft.IdentityModel.Clients.ActiveDirectory.dll" Pack="true" PackagePath="content\net462\Metadata" />
+    <Content Include="..\MetadataGen\MetadataGenerator365\bin\Release\$(TargetFramework)\Microsoft.IdentityModel.Clients.ActiveDirectory.Platform.dll" Pack="true" PackagePath="content\net462\Metadata" />
+    <Content Include="..\MetadataGen\MetadataGenerator365\bin\Release\$(TargetFramework)\Microsoft.Rest.ClientRuntime.dll" Pack="true" PackagePath="content\net462\Metadata" />
+    <Content Include="..\MetadataGen\MetadataGenerator365\bin\Release\$(TargetFramework)\Microsoft.Xrm.Sdk.Deployment.dll" Pack="true" PackagePath="content\net462\Metadata" />
+    <Content Include="..\MetadataGen\MetadataGenerator365\bin\Release\$(TargetFramework)\Microsoft.Xrm.Sdk.dll" Pack="true" PackagePath="content\net462\Metadata" />
+    <Content Include="..\MetadataGen\MetadataGenerator365\bin\Release\$(TargetFramework)\Microsoft.Xrm.Sdk.Workflow.dll" Pack="true" PackagePath="content\net462\Metadata" />
+    <Content Include="..\MetadataGen\MetadataGenerator365\bin\Release\$(TargetFramework)\Microsoft.Xrm.Tooling.Connector.dll" Pack="true" PackagePath="content\net462\Metadata" />
+    <Content Include="..\MetadataGen\MetadataGenerator365\bin\Release\$(TargetFramework)\Newtonsoft.Json.dll" Pack="true" PackagePath="content\net462\Metadata" />
     <Content Include="..\..\files\TypeDeclarations.cs" Pack="true" PackagePath="content\net462\Metadata" />
     <None Include="..\..\resources\XrmMockup-sticker_small.png" Pack="true" PackagePath="" />
   </ItemGroup>
