@@ -49,7 +49,7 @@
     <Content Include="..\MetadataGen\MetadataGenerator365\bin\Release\$(TargetFramework)\MetadataGenerator365.exe" Pack="true" PackagePath="content\net462\Metadata" />
     <Content Include="..\MetadataGen\MetadataGenerator365\bin\Release\$(TargetFramework)\MetadataGenerator365.exe.config" Pack="true" PackagePath="content\net462\Metadata" />
     <Content Include="..\MetadataGen\MetadataGenerator365\bin\Release\$(TargetFramework)\Microsoft.Crm.Sdk.Proxy.dll" Pack="true" PackagePath="content\net462\Metadata" />
-    <Content Include="..\MetadataGen\MetadataGenerator365\bin\Release\$(TargetFramework)\MeMicrosoft.IdentityModel.Clients.ActiveDirectory.dll" Pack="true" PackagePath="content\net462\Metadata" />
+    <Content Include="..\MetadataGen\MetadataGenerator365\bin\Release\$(TargetFramework)\Microsoft.IdentityModel.Clients.ActiveDirectory.dll" Pack="true" PackagePath="content\net462\Metadata" />
     <Content Include="..\MetadataGen\MetadataGenerator365\bin\Release\$(TargetFramework)\Microsoft.IdentityModel.Clients.ActiveDirectory.Platform.dll" Pack="true" PackagePath="content\net462\Metadata" />
     <Content Include="..\MetadataGen\MetadataGenerator365\bin\Release\$(TargetFramework)\Microsoft.Rest.ClientRuntime.dll" Pack="true" PackagePath="content\net462\Metadata" />
     <Content Include="..\MetadataGen\MetadataGenerator365\bin\Release\$(TargetFramework)\Microsoft.Xrm.Sdk.Deployment.dll" Pack="true" PackagePath="content\net462\Metadata" />
