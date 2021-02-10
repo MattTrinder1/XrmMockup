@@ -6,16 +6,19 @@
     <Title>XrmMockup365</Title>
   </PropertyGroup>
   <PropertyGroup>
-    <PackageProjectUrl>http://delegateas.github.io/</PackageProjectUrl>
-    <Authors>Delegate A/S, Martin Kasban Tange, Magnus Gether Sørensen</Authors>
+    <PackageProjectUrl>https://github.com/MattTrinder1/XrmMockup</PackageProjectUrl>
+    <Authors>Matt Trinder (Tisski), Delegate A/S, Martin Kasban Tange, Magnus Gether Sørensen</Authors>
     <Company>Delegate</Company>
-    <Description>Engine which simulates your exact Dynamics 365/CRM instance locally including all of it's logic!</Description>
+    <Description>Bleeding edge version of Delegate A/S XrmMockup</Description>
     <PackageTags>dynamics-365 dynamics-crm csharp testing unit-testing mockup simulation-engine</PackageTags>
     <Copyright>Copyright (c) Delegate A/S 2017</Copyright>
     <PackageIcon>XrmMockup-sticker_small.png</PackageIcon>
-    <RepositoryUrl>https://github.com/delegateas/XrmMockup</RepositoryUrl>
+    <RepositoryUrl>https://github.com/MattTrinder1/XrmMockup</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <Version>1.0.4</Version>
+    <Product>BleedingEdgeXrmMockup365</Product>
+    <PackageId>BleedingEdgeXrmMockup365</PackageId>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <Optimize>false</Optimize>
