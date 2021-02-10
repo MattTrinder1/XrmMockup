@@ -1,3 +1,18 @@
+### 1.4.5 - 14 January 2020
+* Fixed error when using entityreferences in linkentities.
+
+### 1.4.4 - 14 January 2020
+* Add formatted values for late-bound entities (@MattTrinder1)
+
+### 1.4.3 - 14 January 2020
+* Added calculated field calculation to retrieve multiple (@MattTrinder1)
+
+### 1.4.2 - 14 January 2020
+* Added roletemplates as actual records (@MattTrinder1)
+
+### 1.4.1 - 14 January 2020
+* Fixed error where tracing service throws an exception (@MattTrinder1)
+
 ### 1.4.0 - 25 November 2020
 * CodeActivities are now allowed to extend abstract classes.
 * Plugins without a base class will now be found if any class from the dll is referenced in the basePluginTypes setting.

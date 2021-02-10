@@ -21,6 +21,7 @@ using System.IO;
 using DG.Tools.XrmMockup.Database;
 using System.Xml.Linq;
 using static DG.Tools.XrmMockup.MetadataSkeleton;
+using System.Collections.Concurrent;
 
 namespace DG.Tools.XrmMockup
 {
@@ -1114,20 +1115,19 @@ namespace DG.Tools.XrmMockup
 
         internal static void SetFormmattedValues(XrmDb db, Entity entity, EntityMetadata metadata)
         {
-            var validMetadata = metadata.Attributes
-                .Where(a => IsValidForFormattedValues(a));
+            var validMetadata = metadata.Attributes.Where(a => IsValidForFormattedValues(a));
 
-            var formattedValues = new List<KeyValuePair<string, string>>();
-            foreach (var a in entity.Attributes)
-            {
-                if (a.Value == null) continue;
-                var metadataAtt = validMetadata.Where(m => m.LogicalName == a.Key).FirstOrDefault();
-                var formattedValuePair = new KeyValuePair<string, string>(a.Key, Utility.GetFormattedValueLabel(db, metadataAtt, a.Value, entity));
-                if (formattedValuePair.Value != null)
-                {
-                    formattedValues.Add(formattedValuePair);
-                }
-            }
+            var formattedValues = new ConcurrentBag<KeyValuePair<string, string>>();
+
+            Parallel.ForEach(entity.Attributes.Where(x=>x.Value != null), a =>
+             {
+                 var metadataAtt = validMetadata.Where(m => m.LogicalName == a.Key).FirstOrDefault();
+                 var formattedValuePair = new KeyValuePair<string, string>(a.Key, Utility.GetFormattedValueLabel(db, metadataAtt, a.Value, entity));
+                 if (formattedValuePair.Value != null)
+                 {
+                     formattedValues.Add(formattedValuePair);
+                 }
+             });
 
             if (formattedValues.Count > 0)
             {

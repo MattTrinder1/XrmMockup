@@ -44,7 +44,6 @@ namespace DG.Tools.XrmMockup {
 
             FillAliasIfEmpty(queryExpr);
             //var collection = new EntityCollection();
-            var collection = new ConcurrentBag<Entity>();
             db.PrefillDBWithOnlineData(queryExpr);
             var rows = db.GetDBEntityRows(queryExpr.EntityName);
 
@@ -53,81 +52,101 @@ namespace DG.Tools.XrmMockup {
             var entityMetadata = metadata.EntityMetadata[queryExpr.EntityName];
 
 #if !(XRM_MOCKUP_2011 || XRM_MOCKUP_2013)
-            for (int i = 0; i < rows.Count(); i++)
+            var rowBag = new ConcurrentBag<DbRow>();
+            //don't add the rows by passing in via the constructor as it can change the order
+            foreach (var row in rows)
             {
-                core.ExecuteCalculatedFields(rows.ToList()[i].ToEntity(), entityMetadata);
-                //get the rows again to include the calulated values
+                rowBag.Add(row);
             }
+
+            foreach (var row in rowBag)
+            {
+                core.ExecuteCalculatedFields(row.ToEntity(),entityMetadata);
+            }
+            //get the rows again to include the calulated values
             rows = db.GetDBEntityRows(queryExpr.EntityName);
 #endif
 
+            var collection = new ConcurrentBag<KeyValuePair<DbRow, Entity>>();
+
             // foreach (var row in rows)
             Parallel.ForEach(rows, row =>
+            {
+                var entity = row.ToEntity();
+
+                var toAdd = core.GetStronglyTypedEntity(entity, row.Metadata, null);
+
+                if (queryExpr.LinkEntities.Count > 0)
                 {
-                    var entity = row.ToEntity();
-
-                    var toAdd = core.GetStronglyTypedEntity(entity, row.Metadata, null);
-
-                    if (queryExpr.LinkEntities.Count > 0)
+                    //foreach (var linkEntity in queryExpr.LinkEntities)
+                    Parallel.ForEach(queryExpr.LinkEntities, linkEntity =>
                     {
-                        //foreach (var linkEntity in queryExpr.LinkEntities)
-                        Parallel.ForEach(queryExpr.LinkEntities, linkEntity =>
+                        var alliasedValues = GetAliasedValuesFromLinkentity(linkEntity, entity, toAdd, db);
+                        var matchingValues = alliasedValues.Where(e => Utility.MatchesCriteria(e, queryExpr.Criteria));
+                        Parallel.ForEach(matchingValues, m =>
                         {
-                            var alliasedValues = GetAliasedValuesFromLinkentity(linkEntity, entity, toAdd, db);
-                            var matchingValues = alliasedValues.Where(e => Utility.MatchesCriteria(e, queryExpr.Criteria));
-                            foreach (var m in matchingValues)
+                            if (security.HasPermission(m, AccessRights.ReadAccess, userRef))
                             {
-                                if (security.HasPermission(m, AccessRights.ReadAccess, userRef))
-                                {
-                                    Utility.SetFormmattedValues(db, m, entityMetadata);
-                                    collection.Add(m);
-                                }
+                                Utility.SetFormmattedValues(db, m, entityMetadata);
+                                collection.Add(new KeyValuePair<DbRow, Entity>(row, m));
                             }
-                        }
-                        );
-                    }
-                    else if (Utility.MatchesCriteria(toAdd, queryExpr.Criteria))
+                        });
+                    });
+                }
+                else if (Utility.MatchesCriteria(toAdd, queryExpr.Criteria))
+                {
+                    if (security.HasPermission(toAdd, AccessRights.ReadAccess, userRef))
                     {
-                        if (security.HasPermission(toAdd, AccessRights.ReadAccess, userRef))
-                        {
-                            Utility.SetFormmattedValues(db, toAdd, entityMetadata);
-                            collection.Add(toAdd);
-                        }
+                        Utility.SetFormmattedValues(db, toAdd, entityMetadata);
+                        collection.Add(new KeyValuePair<DbRow, Entity>(row, toAdd));
                     }
                 }
-            );
-            
+            });
             
             var orders = queryExpr.Orders;
             var orderedCollection = new EntityCollection();
             // TODO: Check the order that the orders are executed in is correct
+            if (orders == null || orders.Count == 0)
+            {
+                orderedCollection.Entities.AddRange(collection.OrderBy(x => x.Key.Sequence).Select(y=>y.Value));
+            }
             if (orders.Count > 2) {
                 throw new MockupException("Number of orders are greater than 2, unsupported in crm");
             } else if (orders.Count == 1) {
                 if (orders.First().OrderType == OrderType.Ascending)
-                    orderedCollection.Entities.AddRange(collection.OrderBy(x => Utility.GetComparableAttribute(x.Attributes[orders[0].AttributeName])));
+                    orderedCollection.Entities.AddRange(collection.OrderBy(x => Utility.GetComparableAttribute(x.Value.Attributes[orders[0].AttributeName]))
+                        .ThenBy(x => x.Key.Sequence)
+                        .Select(y => y.Value));
                 else
-                    orderedCollection.Entities.AddRange(collection.OrderByDescending(x => Utility.GetComparableAttribute(x.Attributes[orders[0].AttributeName])));
+                    orderedCollection.Entities.AddRange(collection.OrderByDescending(x => Utility.GetComparableAttribute(x.Value.Attributes[orders[0].AttributeName])).Select(y => y.Value));
             } else if (orders.Count == 2) {
                 if (orders[0].OrderType == OrderType.Ascending && orders[1].OrderType == OrderType.Ascending)
                     orderedCollection.Entities.AddRange(collection
-                        .OrderBy(x => Utility.GetComparableAttribute(x.Attributes[orders[0].AttributeName]))
-                        .ThenBy(x => Utility.GetComparableAttribute(x.Attributes[orders[1].AttributeName])));
+                        .OrderBy(x => Utility.GetComparableAttribute(x.Value.Attributes[orders[0].AttributeName]))
+                        .ThenBy(x => Utility.GetComparableAttribute(x.Value.Attributes[orders[1].AttributeName]))
+                        .ThenBy(x => x.Key.Sequence)
+                        .Select(y => y.Value));
 
                 else if (orders[0].OrderType == OrderType.Ascending && orders[1].OrderType == OrderType.Descending)
                     orderedCollection.Entities.AddRange(collection
-                        .OrderBy(x => Utility.GetComparableAttribute(x.Attributes[orders[0].AttributeName]))
-                        .ThenByDescending(x => Utility.GetComparableAttribute(x.Attributes[orders[1].AttributeName])));
+                        .OrderBy(x => Utility.GetComparableAttribute(x.Value.Attributes[orders[0].AttributeName]))
+                        .ThenByDescending(x => Utility.GetComparableAttribute(x.Value.Attributes[orders[1].AttributeName]))
+                        .ThenBy(x => x.Key.Sequence)
+                        .Select(y => y.Value));
 
                 else if (orders[0].OrderType == OrderType.Descending && orders[1].OrderType == OrderType.Ascending)
                     orderedCollection.Entities.AddRange(collection
-                        .OrderByDescending(x => Utility.GetComparableAttribute(x.Attributes[orders[0].AttributeName]))
-                        .ThenBy(x => Utility.GetComparableAttribute(x.Attributes[orders[1].AttributeName])));
+                        .OrderByDescending(x => Utility.GetComparableAttribute(x.Value.Attributes[orders[0].AttributeName]))
+                        .ThenBy(x => Utility.GetComparableAttribute(x.Value.Attributes[orders[1].AttributeName]))
+                        .ThenBy(x => x.Key.Sequence)
+                        .Select(y => y.Value));
 
                 else if (orders[0].OrderType == OrderType.Descending && orders[1].OrderType == OrderType.Descending)
                     orderedCollection.Entities.AddRange(collection
-                        .OrderByDescending(x => Utility.GetComparableAttribute(x.Attributes[orders[0].AttributeName]))
-                        .ThenByDescending(x => Utility.GetComparableAttribute(x.Attributes[orders[1].AttributeName])));
+                        .OrderByDescending(x => Utility.GetComparableAttribute(x.Value.Attributes[orders[0].AttributeName]))
+                        .ThenByDescending(x => Utility.GetComparableAttribute(x.Value.Attributes[orders[1].AttributeName]))
+                        .ThenBy(x => x.Key.Sequence)
+                        .Select(y => y.Value));
             }
 
             var colToReturn = new EntityCollection();
@@ -142,12 +161,12 @@ namespace DG.Tools.XrmMockup {
                 colToReturn = orderedCollection;
             } else {
                 // foreach (var entity in collection) {
-                Parallel.ForEach(collection, entity =>
+                Parallel.ForEach(collection, kvp =>
                 {
-                    KeepAttributesAndAliasAttributes(entity, queryExpr.ColumnSet);
+                    KeepAttributesAndAliasAttributes(kvp.Value, queryExpr.ColumnSet);
                  }
                );
-                colToReturn = new EntityCollection(collection.ToList());
+                colToReturn = new EntityCollection(collection.Select(x=>x.Value).ToList());
             }
 
             // According to docs, should return -1 if ReturnTotalRecordCount set to false
