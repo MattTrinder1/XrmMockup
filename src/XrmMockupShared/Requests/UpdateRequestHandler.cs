@@ -182,7 +182,9 @@ namespace DG.Tools.XrmMockup
             var transactioncurrencyId = "transactioncurrencyid";
             if (updEntity.LogicalName != LogicalNames.TransactionCurrency &&
                 (updEntity.Attributes.ContainsKey(transactioncurrencyId) ||
-                updEntity.Attributes.Any(a => row.Metadata.Attributes.Any(m => m.LogicalName == a.Key && m is MoneyAttributeMetadata))))
+                updEntity.Attributes.Any(a => row.Metadata.Attributes.Any(m => m.LogicalName == a.Key 
+                                                                            && m is MoneyAttributeMetadata 
+                                                                            && a.Value != null ))))
             {
                 if (!xrmEntity.Attributes.ContainsKey(transactioncurrencyId))
                 {
