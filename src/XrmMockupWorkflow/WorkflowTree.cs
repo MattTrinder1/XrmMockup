@@ -437,7 +437,12 @@ namespace WorkflowExecuter
                     return;
                 }
             }
-
+            
+            if (var1 == null || var2 == null)
+            {
+                variables[VariableName] = null;
+                return;
+            }
 
             if (TargetType == "DateTime")
             {
@@ -461,6 +466,11 @@ namespace WorkflowExecuter
             decimal? dec1 = null;
             decimal? dec2 = null;
 
+            if (var1 == null || var2 == null)
+            {
+                variables[VariableName] = null;
+                return;
+            }
 
             switch (TargetType)
             {
