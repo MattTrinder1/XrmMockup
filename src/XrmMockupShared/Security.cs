@@ -201,7 +201,7 @@ namespace DG.Tools.XrmMockup
             return Core.GetDbTable("team")
                         .Select(x => x.ToEntity())
                         .Where(x => x.GetAttributeValue<OptionSetValue>("teamtype").Value == 1)
-                        .Where(x => (x.GetAttributeValue<EntityReference>("teamtemplateid").Id == teamTemplateId))
+                        .Where(x => x.Attributes.Contains("teamtemplateid") && x.GetAttributeValue<EntityReference>("teamtemplateid").Id == teamTemplateId)
                         .Where(x => (x.GetAttributeValue<EntityReference>("regardingobjectid").Id == recordId))
                         .SingleOrDefault();
         }
