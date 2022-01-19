@@ -39,6 +39,20 @@ namespace DG.Tools.XrmMockup.Database {
         {
             int nextSequence = Interlocked.Increment(ref sequence);
             var dbEntity = ToDbRow(xrmEntity,nextSequence, withReferenceChecks);
+
+            var dateCols = dbEntity.AttributeMetadata.Where(x => x.Value is DateTimeAttributeMetadata);
+            foreach (var dateCol in dateCols)
+            {
+                if (dbEntity.ColumnIsSet(dateCol.Key))
+                {
+                    var dateValue = dbEntity[dateCol.Key] as DateTime?;
+                    if (dateValue.HasValue && dateValue < new DateTime(1753, 1, 1))
+                    {
+                        throw new FaultException($"Date is less than the minumum value supported by CrmDateTime. Actual value: {dateValue.Value.ToString("dd/MM/yyyy HH:mm:ss")} Minimum value supported: 01/01/1753 00:00:00");
+                    }
+                }
+            }
+
             this[dbEntity.Table.TableName][dbEntity.Id] = dbEntity;
         }
 
@@ -80,6 +94,21 @@ namespace DG.Tools.XrmMockup.Database {
             var currentDbRow = GetDbRow(xrmEntity);
 
             var dbEntity = DbRow.FromEntity(xrmEntity, withReferenceChecks ? this : null);
+
+            var dateCols = dbEntity.AttributeMetadata.Where(x => x.Value is DateTimeAttributeMetadata);
+            foreach (var dateCol in dateCols)
+            {
+                if (dbEntity.ColumnIsSet(dateCol.Key))
+                {
+                    var dateValue = dbEntity[dateCol.Key] as DateTime?;
+                    if (dateValue.HasValue && dateValue < new DateTime(1753, 1, 1))
+                    {
+                        throw new FaultException($"Date is less than the minumum value supported by CrmDateTime. Actual value: {dateValue.Value.ToString("dd/MM/yyyy HH:mm:ss")} Minimum value supported: 01/01/1753 00:00:00");
+                    }
+                }
+            }
+
+
             //preserve the sequence value
             dbEntity.Sequence = currentDbRow.Sequence;
             this[dbEntity.Table.TableName][dbEntity.Id] = dbEntity;
