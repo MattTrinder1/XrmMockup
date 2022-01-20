@@ -549,6 +549,20 @@ namespace DG.Tools.XrmMockup
                 OrganizationId = this.OrganizationId,
                 PrimaryEntityName = primaryRef?.LogicalName,
             };
+
+            if (parentPluginContext != null)
+            {
+                foreach (var variable in parentPluginContext.SharedVariables)
+                {
+                    if (pluginContext.MessageName.ToLower() == parentPluginContext.MessageName.ToLower()
+                        &&
+                        pluginContext.PrimaryEntityName.ToLower() == parentPluginContext.PrimaryEntityName.ToLower())
+                    {
+                        pluginContext.SharedVariables.Add(variable.Key, variable.Value);
+                    }
+                }
+            }
+
             if (primaryRef != null)
             {
                 var refEntity = db.GetEntityOrNull(primaryRef);
