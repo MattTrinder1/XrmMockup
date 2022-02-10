@@ -413,7 +413,7 @@ namespace DG.Tools.XrmMockup {
             {
                 if (pluginContext.Depth > 8)
                 {
-                    throw new FaultException(
+                    throw new FaultException(new FaultReason("reason"),new FaultCode("code"),
                         "This workflow job was canceled because the workflow that started it included an infinite loop." +
                         " Correct the workflow logic and try again.");
                 }

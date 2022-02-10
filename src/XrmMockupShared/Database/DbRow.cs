@@ -143,6 +143,16 @@ namespace DG.Tools.XrmMockup.Database {
             var keys = Keys.Select(ConvertToXrmKeyValue);
             xrmEntity.KeyAttributes.AddRange(keys);
 #endif
+
+            //remove null values
+            foreach (var col in Columns)
+            {
+                if (xrmEntity.Contains(col.Key) && xrmEntity[col.Key] is null)
+                {
+                    xrmEntity.Attributes.Remove(col.Key);
+                }
+            }
+
             return xrmEntity;
         }
 

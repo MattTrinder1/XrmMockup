@@ -6,6 +6,8 @@
     <Title>MetadataGenerator365</Title>
     <Company>Delegate</Company>
     <Description>Tool to generate early-bound .NET classes and enumerations for MS Dynamics 365/CRM server-side coding.</Description>
+    <AssemblyVersion>1.0.12.0</AssemblyVersion>
+    <FileVersion>1.0.12.0</FileVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <Optimize>false</Optimize>

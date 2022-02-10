@@ -437,12 +437,7 @@ namespace WorkflowExecuter
                     return;
                 }
             }
-            
-            if (var1 == null || var2 == null)
-            {
-                variables[VariableName] = null;
-                return;
-            }
+        
 
             if (TargetType == "DateTime")
             {
@@ -466,12 +461,16 @@ namespace WorkflowExecuter
             decimal? dec1 = null;
             decimal? dec2 = null;
 
-            if (var1 == null || var2 == null)
+            //if both are null then don't do anything
+            if (var1 == null && var2 == null)
             {
                 variables[VariableName] = null;
                 return;
             }
 
+
+            //else if one is numeric and they are numbers then assume the null one = 0
+            //this allows us to increment a field which may be starting at null, to become 1
             switch (TargetType)
             {
                 case "Money":
