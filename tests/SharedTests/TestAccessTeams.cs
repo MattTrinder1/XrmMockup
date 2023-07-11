@@ -110,7 +110,7 @@ namespace DG.XrmMockupTest
             }
             catch (Exception ex)
             {
-                if (!ex.Message.Contains("does not have write access"))
+                if (!ex.Message.ToLower().Contains("does not have writeaccess"))
                 {
                     throw;
                 }
@@ -152,7 +152,7 @@ namespace DG.XrmMockupTest
             }
             catch (Exception ex)
             {
-                if (!ex.Message.Contains("does not have write access"))
+                if (!ex.Message.ToLower().Contains("does not have writeaccess"))
                 {
                     throw;
                 }

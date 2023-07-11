@@ -30,7 +30,6 @@
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\src\XrmMockup2015\XrmMockup2015.csproj" />
     <ProjectReference Include="..\TestPluginAssembly15\TestPluginAssembly15.csproj" />
   </ItemGroup>
   <ItemGroup>

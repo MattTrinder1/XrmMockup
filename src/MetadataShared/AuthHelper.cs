@@ -4,9 +4,7 @@ using System;
 using System.Configuration;
 using System.Net;
 using System.IO;
-#if XRM_METADATA_365
-using Microsoft.Xrm.Tooling.Connector;
-#endif
+using Microsoft.PowerPlatform.Dataverse.Client;
 
 namespace DG.Tools.XrmMockup.Metadata
 {
@@ -119,25 +117,24 @@ namespace DG.Tools.XrmMockup.Metadata
         {
             switch (this.method)
             {
-#if XRM_METADATA_365
-                case ConnectionType.OAuth:
-                    {
-                        if (this.username == null || this.password == null || this.clientId == null || this.returnUrl == null)
-                        {
-                            throw new Exception("Not all required information was entered for connection type OAuth");
-                        }
+                //case ConnectionType.OAuth:
+                //    {
+                //        if (this.username == null || this.password == null || this.clientId == null || this.returnUrl == null)
+                //        {
+                //            throw new Exception("Not all required information was entered for connection type OAuth");
+                //        }
 
-                        Utilities.GetOrgnameAndOnlineRegionFromServiceUri(new Uri(this.url), out string region, out string orgName, out bool isOnPrem);
-                        var cacheFileLocation = System.IO.Path.Combine(System.IO.Path.GetTempPath(), orgName, "oauth-cache.txt");
-                        var client = new CrmServiceClient(this.username, CrmServiceClient.MakeSecureString(this.password), region, orgName, false, null, null,
-                            this.clientId, new Uri(this.returnUrl), cacheFileLocation, null);
+                //        Utilities.GetOrgnameAndOnlineRegionFromServiceUri(new Uri(this.url), out string region, out string orgName, out bool isOnPrem);
+                //        var cacheFileLocation = System.IO.Path.Combine(System.IO.Path.GetTempPath(), orgName, "oauth-cache.txt");
+                //        var client = new ServiceClient(this.username, ServiceClient.MakeSecureString(this.password), region, orgName, false, null, null,null,
+                //            this.clientId, new Uri(this.returnUrl), cacheFileLocation, null);
 
-                        if (!client.IsReady)
-                        {
-                            throw new Exception($"Client could not authenticate. If the application user was just created, it might take a while before it is available.\n{client.LastCrmError}");
-                        }
-                        return client;
-                    }
+                //        if (!client.IsReady)
+                //        {
+                //            throw new Exception($"Client could not authenticate. If the application user was just created, it might take a while before it is available.\n{client.LastCrmError}");
+                //        }
+                //        return client;
+                //    }
 
                 case ConnectionType.ClientSecret:
                     {
@@ -146,12 +143,11 @@ namespace DG.Tools.XrmMockup.Metadata
                             throw new Exception("Not all required information was entered for connection type ClientSecret");
                         }
 
-                        var client = new CrmServiceClient(new Uri(this.url), this.clientId, CrmServiceClient.MakeSecureString(this.clientSecret), true,
-                            Path.Combine(Path.GetTempPath(), this.clientId, "oauth-cache.txt"));
+                        var client = new ServiceClient(new Uri(this.url), this.clientId, this.clientSecret, true);
 
                         if (!client.IsReady)
                         {
-                            throw new Exception($"Client could not authenticate. If the application user was just created, it might take a while before it is available.\n{client.LastCrmError}");
+                            throw new Exception($"Client could not authenticate. If the application user was just created, it might take a while before it is available.\n{client.LastError}");
                         }
                         return client;
                     }
@@ -163,16 +159,15 @@ namespace DG.Tools.XrmMockup.Metadata
                             throw new Exception("Ensure connection string is specified when using connection method ConnectionString");
                         }
 
-                        var client = new CrmServiceClient(this.connectionString);
+                        var client = new ServiceClient(this.connectionString);
 
                         if (!client.IsReady)
                         {
-                            throw new Exception($"Client could not authenticate. If the application user was just created, it might take a while before it is available.\n{client.LastCrmError}");
+                            throw new Exception($"Client could not authenticate. If the application user was just created, it might take a while before it is available.\n{client.LastError}");
                         }
 
                         return client;
                     }
-#endif
                 case ConnectionType.Proxy:
                 default:
                     var m = ServiceConfigurationFactory.CreateManagement<IOrganizationService>(new Uri(url));

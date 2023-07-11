@@ -11,7 +11,6 @@ using Microsoft.Xrm.Sdk.Query;
 using System.Reflection;
 using Microsoft.Crm.Sdk.Messages;
 using System.ServiceModel;
-using System.Web.WebSockets;
 using Microsoft.Xrm.Sdk.Metadata;
 using WorkflowExecuter;
 using DG.Tools.XrmMockup.Database;

@@ -99,7 +99,7 @@ namespace DG.Tools.XrmMockup {
             }
             catch (Exception ex)
             {
-                if (!ex.Message.StartsWith("No parameterless constructor"))
+                if (!ex.Message.Contains("No parameterless constructor"))
                 {
                     throw;
                 }

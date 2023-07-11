@@ -37,7 +37,7 @@ namespace DG.Tools.XrmMockup {
 
         public OrganizationServiceProxy GetServiceProxy() {
             var proxy = GetServiceProxyInternal();
-            proxy.ServiceConfiguration.CurrentServiceEndpoint.Behaviors.Add(new ProxyTypesBehavior());
+            proxy.ServiceConfiguration.CurrentServiceEndpoint.EndpointBehaviors.Add(new ProxyTypesBehavior());
             proxy.Timeout = new TimeSpan(1, 0, 0);
             return proxy;
         }

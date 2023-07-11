@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Library</OutputType>
-    <TargetFramework>net462</TargetFramework>
+    <TargetFramework>net7.0</TargetFramework>
     <DebugType>portable</DebugType>
     <Title>XrmMockup365</Title>
   </PropertyGroup>
@@ -35,19 +35,6 @@
     <ErrorReport>prompt</ErrorReport>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="System" />
-    <Reference Include="System.Activities" />
-    <Reference Include="System.configuration" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Web.Extensions" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Net.Http" />
-    <Reference Include="System.Xml" />
-  </ItemGroup>
-  <ItemGroup>
     <Content Include="..\MetadataGen\MetadataGenerator365\bin\Release\$(TargetFramework)\MetadataGenerator365.exe" Pack="true" PackagePath="content\net462\Metadata" />
     <Content Include="..\MetadataGen\MetadataGenerator365\bin\Release\$(TargetFramework)\MetadataGenerator365.exe.config" Pack="true" PackagePath="content\net462\Metadata" />
     <Content Include="..\MetadataGen\MetadataGenerator365\bin\Release\$(TargetFramework)\Microsoft.Crm.Sdk.Proxy.dll" Pack="true" PackagePath="content\net462\Metadata" />
@@ -63,9 +50,9 @@
     <None Include="..\..\resources\XrmMockup-sticker_small.png" Pack="true" PackagePath="" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.CrmSdk.CoreAssemblies" Version="9.0.2.28" />
-    <PackageReference Include="Microsoft.CrmSdk.Workflow" Version="9.0.2.28" />
-    <PackageReference Include="Microsoft.CrmSdk.XrmTooling.CoreAssembly" Version="9.1.0.51" />
+    <PackageReference Include="Microsoft.CrmSdk.Workflow" Version="9.0.2.49" />
+    <PackageReference Include="Microsoft.PowerPlatform.Dataverse.Client" Version="1.1.9" />
+    <PackageReference Include="UiPath.Workflow.Runtime" Version="6.0.3" />
   </ItemGroup>
   <Import Project="..\XrmMockupShared\XrmMockupShared.projitems" Label="Shared" />
   <Import Project="..\XrmMockupWorkflow\XrmMockupWorkflow.projitems" Label="Shared" />
