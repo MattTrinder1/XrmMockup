@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-#if !XRM_MOCKUP_PLUGIN_2011
+
 namespace DG.Delegate.TSTOnboarding.Plugins
 {
     public class AccountCurrencyBase : PluginNonDaxif
@@ -35,4 +35,3 @@ namespace DG.Delegate.TSTOnboarding.Plugins
         }
     }
 }
-#endif

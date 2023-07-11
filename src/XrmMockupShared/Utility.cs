@@ -68,7 +68,6 @@ namespace DG.Tools.XrmMockup
             return CloneEntity(entity, null, null);
         }
 
-#if !(XRM_MOCKUP_2011 || XRM_MOCKUP_2013 || XRM_MOCKUP_2015)
         public static KeyAttributeCollection CloneKeyAttributes(this Entity entity)
         {
             var kac = new KeyAttributeCollection();
@@ -78,7 +77,6 @@ namespace DG.Tools.XrmMockup
             }
             return kac;
         }
-#endif
 
         public static Entity CloneEntity(this Entity entity, EntityMetadata metadata, ColumnSet cols)
         {
@@ -93,9 +91,7 @@ namespace DG.Tools.XrmMockup
             }
             clone.EntityState = entity.EntityState;
 
-#if !(XRM_MOCKUP_2011 || XRM_MOCKUP_2013 || XRM_MOCKUP_2015)
             clone.KeyAttributes = entity.CloneKeyAttributes();
-#endif
 
             return clone.SetAttributes(entity.Attributes, metadata, cols);
         }
@@ -304,7 +300,6 @@ namespace DG.Tools.XrmMockup
             return null;
         }
 
-#if !(XRM_MOCKUP_2011 || XRM_MOCKUP_2013)
         internal static void CheckStatusTransitions(EntityMetadata metadata, Entity newEntity, Entity prevEntity)
         {
             if (newEntity == null || prevEntity == null) return;
@@ -351,7 +346,6 @@ namespace DG.Tools.XrmMockup
             }
             return false;
         }
-#endif
         internal static OptionMetadataCollection GetStatusOptionMetadata(EntityMetadata metadata)
         {
             return (metadata.Attributes
@@ -590,7 +584,6 @@ namespace DG.Tools.XrmMockup
             {
                 case var c when condition.AttributeName == null:
                     return Matches(row.Id, condition.Operator, condition.Values);
-#if !XRM_MOCKUP_2011
                 case var c when condition.EntityName != null:
                     var key = $"{condition.EntityName}.{condition.AttributeName}";
                     if (row != null && row.Contains(key))
@@ -602,7 +595,6 @@ namespace DG.Tools.XrmMockup
                         attr = row[condition.AttributeName];
                     }
                     break;
-#endif
                 default:
                     if (row.Contains(condition.AttributeName))
                     {
@@ -1080,18 +1072,14 @@ namespace DG.Tools.XrmMockup
         internal static EntityReference ToEntityReferenceWithKeyAttributes(this Entity entity)
         {
             var reference = entity.ToEntityReference();
-#if !(XRM_MOCKUP_2011 || XRM_MOCKUP_2013 || XRM_MOCKUP_2015)
             reference.KeyAttributes = entity.KeyAttributes;
-#endif
             return reference;
         }
 
-#if !(XRM_MOCKUP_2011 || XRM_MOCKUP_2013 || XRM_MOCKUP_2015)
         internal static string ToPrettyString(this KeyAttributeCollection keys)
         {
             return "(" + String.Join(", ", keys.Select(x => $"{x.Key}:{x.Value}")) + ")";
         }
-#endif
 
         internal static Entity ToActivityPointer(this Entity entity)
         {
@@ -1116,10 +1104,8 @@ namespace DG.Tools.XrmMockup
             pointer["scheduledend"] = entity.GetAttributeValue<DateTime?>("scheduledend");
             pointer["scheduledstart"] = entity.GetAttributeValue<DateTime?>("scheduledstart");
             pointer["subject"] = entity.GetAttributeValue<string>("subject");
-#if !(XRM_MOCKUP_2011)
             pointer["senton"] = entity.GetAttributeValue<DateTime?>("senton");
             pointer["deliveryprioritycode"] = entity.GetAttributeValue<OptionSetValue>("deliveryprioritycode");
-#endif
 
 
             switch (entity.GetAttributeValue<OptionSetValue>("statecode").Value)
@@ -1256,9 +1242,7 @@ namespace DG.Tools.XrmMockup
         {
             var defaultTeam = new Entity(LogicalNames.Team);
             defaultTeam["name"] = rootBusinessUnit.Attributes["name"];
-#if !(XRM_MOCKUP_2011)
             defaultTeam["teamtype"] = new OptionSetValue(0);
-#endif
             defaultTeam["isdefault"] = true;
             defaultTeam["description"] = "Default team for the parent business unit. The name and membership for default team are inherited from their parent business unit.";
             defaultTeam["administratorid"] = useReference;

@@ -18,9 +18,7 @@ namespace DG.Tools.XrmMockup.Database {
         public int Sequence { get; set; }
 
         private Dictionary<string, object> Columns = new Dictionary<string, object>();
-#if !(XRM_MOCKUP_2011 || XRM_MOCKUP_2013 || XRM_MOCKUP_2015)
         private Dictionary<string, object> Keys = new Dictionary<string, object>();
-#endif
 
         public EntityMetadata Metadata {
             get {
@@ -139,10 +137,8 @@ namespace DG.Tools.XrmMockup.Database {
             var attributes = Columns.Select(ConvertToXrmKeyValue);
             xrmEntity.Attributes.AddRange(attributes);
 
-#if !(XRM_MOCKUP_2011 || XRM_MOCKUP_2013 || XRM_MOCKUP_2015)
             var keys = Keys.Select(ConvertToXrmKeyValue);
             xrmEntity.KeyAttributes.AddRange(keys);
-#endif
 
             //remove null values
             foreach (var col in Columns)

@@ -45,7 +45,6 @@ namespace DG.XrmMockupTest
             Assert.Equal("updated by admin plugin", checkNote.GetAttributeValue<string>("notetext"));
         }
 
-#if !XRM_MOCKUP_TEST_2011
         [Fact]
         public void TestImages()
         {
@@ -63,7 +62,6 @@ namespace DG.XrmMockupTest
 
             orgAdminUIService.Delete(Account.EntityLogicalName, createdAccount.Id);
         }
-#endif
 
         [Fact]
         public void TestDirectIPluginImplementationPreOp()
@@ -141,7 +139,6 @@ namespace DG.XrmMockupTest
             }
         }
 
-#if !XRM_MOCKUP_TEST_2011
         [Fact]
         public void TestUpdateBase()
         {
@@ -163,7 +160,6 @@ namespace DG.XrmMockupTest
                 Assert.Equal(acc.Name + "UpdateBase", retrieved.Name);
             }
         }
-#endif
 
         [Fact]
         public void TestAddedFields()

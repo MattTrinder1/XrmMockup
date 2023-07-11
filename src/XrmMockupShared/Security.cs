@@ -279,7 +279,6 @@ namespace DG.Tools.XrmMockup
             db.Update(existing);
         }
 
-#if !(XRM_MOCKUP_2011 || XRM_MOCKUP_2013 || XRM_MOCKUP_2015)
         internal void CascadeOwnerUpdate(Entity dbEntity, EntityReference userRef, EntityReference ownerRef)
         {
             // Cascade like Assign, but with UpdateRequests
@@ -332,7 +331,6 @@ namespace DG.Tools.XrmMockup
                 }
             }
         }
-#endif
 
         internal void CheckAssignPermission(Entity entity, EntityReference assignee, EntityReference userRef)
         {
@@ -716,10 +714,8 @@ namespace DG.Tools.XrmMockup
             // check if any of the Teams that the caller is a member of has access
             if (HasTeamMemberPermission(entity, access, caller)) return true;
 
-#if !(XRM_MOCKUP_2011)
             // check if any of the Teams that the caller is a member of has access
             if (HasAccessTeamMemberPermission(entity, access, caller)) return true;
-#endif
 
             // check if there are any shares of the entity with the caller
             if (HasSharePermission(entity, access, caller)) return true;

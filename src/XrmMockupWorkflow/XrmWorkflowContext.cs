@@ -64,8 +64,7 @@ namespace WorkflowExecuter {
 
         public int WorkflowCategory { get; set; }
 
-#if !XRM_MOCKUP_2011
         public int WorkflowMode { get; set; }
-#endif
+
     }
 }

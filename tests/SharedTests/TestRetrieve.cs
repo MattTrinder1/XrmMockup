@@ -291,7 +291,6 @@ namespace DG.XrmMockupTest
         }
 
 
-#if !(XRM_MOCKUP_TEST_2011 || XRM_MOCKUP_TEST_2013 || XRM_MOCKUP_TEST_2015 || XRM_MOCKUP_TEST_2016)
         [Fact]
         public void TestEmptyCalculatedFieldss()
         {
@@ -301,6 +300,6 @@ namespace DG.XrmMockupTest
                 dg_animal.Retrieve(orgAdminService, id1, x => x.dg_EmptyCalculatedField);
             }
         }
-#endif
+
     }
 }

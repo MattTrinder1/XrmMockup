@@ -33,7 +33,6 @@ namespace DG.Tools.XrmMockup
 
             var currentVersion = row.ToEntity();
 
-#if !(XRM_MOCKUP_2011 || XRM_MOCKUP_2013 || XRM_MOCKUP_2015)
             var ownerRef = request.Target.GetAttributeValue<EntityReference>("ownerid");
             if (ownerRef != null)
             {
@@ -43,7 +42,6 @@ namespace DG.Tools.XrmMockup
                 
                 security.CheckAssignPermission(xrmEntity, ownerRef, userRef);
             }
-#endif
 
             if (core.GetMockupSettings().AppendAndAppendToPrivilegeCheck.GetValueOrDefault(true))
             {
@@ -150,9 +148,7 @@ namespace DG.Tools.XrmMockup
             }
 
 
-#if !(XRM_MOCKUP_2011 || XRM_MOCKUP_2013)
             Utility.CheckStatusTransitions(row.Metadata, updEntity, xrmEntity);
-#endif
 
 
             if (Utility.HasCircularReference(metadata.EntityMetadata, updEntity))
@@ -203,12 +199,10 @@ namespace DG.Tools.XrmMockup
                 Utility.HandleCurrencies(metadata, db, xrmEntity);
             }
 
-#if !(XRM_MOCKUP_2011 || XRM_MOCKUP_2013 || XRM_MOCKUP_2015)
             if (updEntity.Attributes.ContainsKey("statecode") || updEntity.Attributes.ContainsKey("statuscode"))
             {
                 Utility.HandleCurrencies(metadata, db, xrmEntity);
             }
-#endif
 
             if (ownerRef != null)
             {
@@ -216,9 +210,7 @@ namespace DG.Tools.XrmMockup
                 {
 
                     Utility.SetOwner(db, security, metadata, xrmEntity, ownerRef);
-#if !(XRM_MOCKUP_2011 || XRM_MOCKUP_2013 || XRM_MOCKUP_2015)
                     security.CascadeOwnerUpdate(xrmEntity, userRef, ownerRef);
-#endif
                 }
             }
             

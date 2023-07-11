@@ -1,5 +1,4 @@
-﻿#if !(XRM_MOCKUP_2011 || XRM_MOCKUP_2013 || XRM_MOCKUP_2015)
-
+﻿
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -40,4 +39,3 @@ namespace DG.Tools.XrmMockup {
         }
     }
 }
-#endif

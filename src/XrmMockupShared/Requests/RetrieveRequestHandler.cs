@@ -25,15 +25,9 @@ namespace DG.Tools.XrmMockup {
             }
 
 
-#if !(XRM_MOCKUP_2011 || XRM_MOCKUP_2013 || XRM_MOCKUP_2015)
             if (request.ColumnSet == null && request.Target.KeyAttributes.Count == 0) {
                 throw new FaultException("The columnset parameter must not be null when no KeyAttributes are provided");
             }
-#else
-            if (request.ColumnSet == null) {
-                throw new FaultException("The columnset parameter must not be null");
-            }
-#endif
             var row = db.GetDbRow(request.Target);
 
             if (!security.HasPermission(row.ToEntity(), AccessRights.ReadAccess, userRef)) {
@@ -42,11 +36,9 @@ namespace DG.Tools.XrmMockup {
             row = db.GetDbRow(request.Target);
             var entity = core.GetStronglyTypedEntity(row.ToEntity(), row.Metadata, request.ColumnSet);
 
-#if !(XRM_MOCKUP_2011 || XRM_MOCKUP_2013)
             core.ExecuteCalculatedFields(entity, row.Metadata);
             row = db.GetDbRow(request.Target);
             entity = core.GetStronglyTypedEntity(row.ToEntity(), row.Metadata, request.ColumnSet);
-#endif
 
 
             Utility.SetFormmattedValues(db, entity, row.Metadata);
@@ -55,9 +47,7 @@ namespace DG.Tools.XrmMockup {
                 Utility.RemoveUnsettableAttributes("Retrieve", row.Metadata, entity);
             }
 
-#if !(XRM_MOCKUP_2011 || XRM_MOCKUP_2013)
             Utility.HandlePrecision(metadata, db, entity);
-#endif
             if (request.RelatedEntitiesQuery != null) {
                 core.AddRelatedEntities(entity, request.RelatedEntitiesQuery, userRef);
             }

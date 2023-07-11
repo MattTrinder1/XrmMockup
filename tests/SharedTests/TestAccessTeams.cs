@@ -1,4 +1,4 @@
-﻿#if !XRM_MOCKUP_TEST_2011
+﻿
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -254,7 +254,7 @@ namespace DG.XrmMockupTest
             testUser1Service.Delete("contact", contact2.Id);
         }
 
-#if (XRM_MOCKUP_TEST_365 || XRM_MOCKUP_TEST_2016)
+
         [Fact]
         public void SimpleAssignTest()
         {
@@ -295,7 +295,7 @@ namespace DG.XrmMockupTest
             updateContact["ownerid"] = testUser1.ToEntityReference();
             testUser1Service.Update(updateContact);
         }
-#endif
+
         [Fact]
         public void SimpleDeleteTest()
         {
@@ -540,4 +540,4 @@ namespace DG.XrmMockupTest
         }
     }
 }
-#endif
+

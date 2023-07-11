@@ -38,9 +38,7 @@ namespace DG.Tools.XrmMockup
         public bool reparent = false;
         public bool share = false;
         public bool unshare = false;
-#if !(XRM_MOCKUP_2011 || XRM_MOCKUP_2013 || XRM_MOCKUP_2015)
         public bool rollup = false;
-#endif
     }
 
     /// <summary>
@@ -198,17 +196,11 @@ namespace DG.Tools.XrmMockup
                 new CloseIncidentRequestHandler(this, db, metadata, security),
                 new AddMembersTeamRequestHandler(this, db, metadata, security),
                 new RemoveMembersTeamRequestHandler(this, db, metadata, security),
-#if !(XRM_MOCKUP_2011)
                 new AddUserToRecordTeamRequestHandler(this, db, metadata, security),
                 new RemoveUserFromRecordTeamRequestHandler(this, db, metadata, security),
-#endif
-#if !(XRM_MOCKUP_2011 || XRM_MOCKUP_2013)
-            new IsValidStateTransitionRequestHandler(this, db, metadata, security),
+                new IsValidStateTransitionRequestHandler(this, db, metadata, security),
                 new CalculateRollupFieldRequestHandler(this, db, metadata, security),
-#endif
-#if !(XRM_MOCKUP_2011 || XRM_MOCKUP_2013 || XRM_MOCKUP_2015)
                 new UpsertRequestHandler(this, db, metadata, security),
-#endif
                 new RetrieveAttributeRequestHandler(this, db, metadata, security),
                 new WhoAmIRequestHandler(this, db, metadata, security),
                 new RetrievePrincipalAccessRequestHandler(this, db, metadata, security),
@@ -299,9 +291,7 @@ namespace DG.Tools.XrmMockup
             {
                 toReturn = entity.CloneEntity(metadata, colsToKeep);
             }
-#if !(XRM_MOCKUP_2011 || XRM_MOCKUP_2013 || XRM_MOCKUP_2015)
             toReturn.KeyAttributes = entity.CloneKeyAttributes();
-#endif
             return toReturn;
 
         }
@@ -422,10 +412,8 @@ namespace DG.Tools.XrmMockup
             if (selection.unshare && HasCascadeBehaviour(cascadeConfiguration.Unshare))
                 return true;
 
-#if !(XRM_MOCKUP_2011 || XRM_MOCKUP_2013 || XRM_MOCKUP_2015 || XRM_MOCKUP_2016)
             if (selection.rollup && HasCascadeBehaviour(cascadeConfiguration.RollupView))
                 return true;
-#endif
             return false;
         }
 
@@ -720,7 +708,6 @@ namespace DG.Tools.XrmMockup
 
         private OrganizationResponse ExecuteRequest(OrganizationRequest request, EntityReference userRef, PluginContext parentPluginContext)
         {
-#if !(XRM_MOCKUP_2011 || XRM_MOCKUP_2013 || XRM_MOCKUP_2015)
             if (request is AssignRequest assignRequest)
             {
                 var targetEntity = db.GetEntityOrNull(assignRequest.Target);
@@ -752,7 +739,6 @@ namespace DG.Tools.XrmMockup
                 }
                 return new SetStateResponse();
             }
-#endif
             if (workflowManager.GetActionDefaultNull(request.RequestName) != null)
             {
                 return ExecuteAction(request);
@@ -1051,7 +1037,6 @@ namespace DG.Tools.XrmMockup
             security.ResetEnvironment(db);
         }
 
-#if !(XRM_MOCKUP_2011 || XRM_MOCKUP_2013)
         internal void ExecuteCalculatedFields(Entity entity,EntityMetadata entityMetadata)
         {
             var attributes = entityMetadata.Attributes.Where(
@@ -1080,7 +1065,6 @@ namespace DG.Tools.XrmMockup
                     factory, factory.GetService(typeof(ITracingService)) as ITracingService,true);
             }
         }
-#endif
         internal EntityMetadata GetEntityMetadata(string entityLogicalName)
         {
             return metadata.EntityMetadata[entityLogicalName];
