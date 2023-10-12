@@ -22,7 +22,7 @@ namespace DG.Tools.XrmMockup.Database
             { AttributeTypeCode.Integer, typeof(int) },
             { AttributeTypeCode.Lookup,  typeof(DbRow) },
             // TODO: Figure out type
-            //{ AttributeTypeCode.ManagedProperty, typeof(object) },
+            { AttributeTypeCode.ManagedProperty, typeof(object) },
             { AttributeTypeCode.Memo, typeof(string) },
             { AttributeTypeCode.Money, typeof(decimal) },
             { AttributeTypeCode.Owner, typeof(DbRow) },

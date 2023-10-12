@@ -401,6 +401,15 @@ namespace DG.Tools.XrmMockup
         }
 
         /// <summary>
+        /// Enables triggering of registered plugins. 
+        /// </summary>
+        /// <param name="include"></param>
+        public void ResetPlugins()
+        {
+            Core.ResetPlugins();
+        }
+
+        /// <summary>
         /// Register additional plugins to be triggered in addition to the existing plugins in the current environment.
         /// Plugins registered temporarily will be deleted when <see cref="ResetEnvironment"/> is called.
         /// </summary>

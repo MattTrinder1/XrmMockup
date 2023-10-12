@@ -967,12 +967,17 @@ namespace DG.Tools.XrmMockup
         {
             return Utility.GetBusinessUnit(db, owner);
         }
-#endregion
+        #endregion
 
 
         internal void DisabelRegisteredPlugins(bool include)
         {
             pluginManager.DisabelRegisteredPlugins(include);
+        }
+
+        internal void ResetPlugins()
+        {
+            pluginManager.ResetPlugins();
         }
 
         internal XrmMockupSettings GetMockupSettings()
