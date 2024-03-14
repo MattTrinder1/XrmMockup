@@ -915,29 +915,128 @@ namespace DG.Tools.XrmMockup
 
         internal static MetadataSkeleton GetMetadata(string folderLocation)
         {
+            bool seperateFiles = false;
+            bool seperateEntityFiles = false;
+
             var pathToMetadata = Path.Combine(folderLocation, "Metadata.xml");
             if (!File.Exists(pathToMetadata))
             {
-                throw new ArgumentException($"Could not find metadata file at '{pathToMetadata}'." +
-                    " Be sure to run Metadata/GetMetadata.cmd to generate it after setting it up in Metadata/Config.fsx.");
-            }
 
-            //check for any additional metadata files
-            var metaDataFiles = Directory.GetFiles(folderLocation, "*Metadata.xml");
+                pathToMetadata = Path.Combine(folderLocation, "EntityMetadata.xml");
+                if (!File.Exists(pathToMetadata))
+                {
+
+                    pathToMetadata = Path.Combine(folderLocation, "Entities");
+                    if (!Directory.Exists(pathToMetadata))
+                    {
+
+                        throw new ArgumentException($"Could not find metadata file at '{pathToMetadata}'." +
+                    " Be sure to run Metadata/GetMetadata.cmd to generate it after setting it up in Metadata/Config.fsx.");
+                    }
+                    else
+                    {
+                        seperateEntityFiles = true;
+                        seperateFiles = true;
+                    }
+                }
+                else
+                {
+                    seperateFiles = true;
+                }
+            }
 
             var master = new MetadataSkeleton();
-            var serializer = new DataContractSerializer(typeof(MetadataSkeleton));
-            using (var stream = new FileStream(pathToMetadata, FileMode.Open, FileAccess.Read, FileShare.Read))
-            {
-                master = (MetadataSkeleton)serializer.ReadObject(stream);
-            }
 
-            foreach (var file in metaDataFiles.Where(x => Path.GetFileName(x) != Path.GetFileName(pathToMetadata)))
+            //check for any additional metadata files
+            if (seperateEntityFiles)
             {
-                serializer = new DataContractSerializer(typeof(MetadataSkeleton));
-                using (var stream = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.Read))
+                master.EntityMetadata = new Dictionary<string, EntityMetadata>();
+                //assemble the entity meta data from the individual files
+                var entityMetadataFiles = Directory.GetFiles(Path.Combine(folderLocation, "Entities"), "*Metadata.xml");
+                foreach (var emdf in entityMetadataFiles)
                 {
-                    master.Merge((MetadataSkeleton)serializer.ReadObject(stream));
+                    var entitySerializer = new DataContractSerializer(typeof(KeyValuePair<string, EntityMetadata>));
+                    using (var stream = new FileStream(emdf, FileMode.Open, FileAccess.Read, FileShare.Read))
+                    {
+                        var entity = (KeyValuePair<string, EntityMetadata>)entitySerializer.ReadObject(stream);
+                        master.EntityMetadata.Add(entity.Key, entity.Value);
+                    }
+                }
+            }
+            if (seperateFiles)
+            {
+                var entitySerializer = new DataContractSerializer(typeof(Entity));
+                using (var stream = new FileStream(Path.Combine(folderLocation, "BaseOrganizationMetadata.xml"), FileMode.Open, FileAccess.Read, FileShare.Read))
+                {
+                    master.BaseOrganization = (Entity)entitySerializer.ReadObject(stream);
+                }
+
+                entitySerializer = new DataContractSerializer(typeof(Entity));
+                using (var stream = new FileStream(Path.Combine(folderLocation, "RootBusinessUnitMetadata.xml"), FileMode.Open, FileAccess.Read, FileShare.Read))
+                {
+                    master.RootBusinessUnit = (Entity)entitySerializer.ReadObject(stream);
+                }
+
+                entitySerializer = new DataContractSerializer(typeof(Dictionary<string, Dictionary<int, int>>));
+                using (var stream = new FileStream(Path.Combine(folderLocation, "DefaultStateStatusMetadata.xml"), FileMode.Open, FileAccess.Read, FileShare.Read))
+                {
+                    master.DefaultStateStatus = (Dictionary<string, Dictionary<int, int>>)entitySerializer.ReadObject(stream);
+                }
+
+                entitySerializer = new DataContractSerializer(typeof(List<Entity>));
+                using (var stream = new FileStream(Path.Combine(folderLocation, "CurrenciesMetadata.xml"), FileMode.Open, FileAccess.Read, FileShare.Read))
+                {
+                    master.Currencies = (List<Entity>)entitySerializer.ReadObject(stream);
+                }
+
+                entitySerializer = new DataContractSerializer(typeof(List<Entity>));
+                using (var stream = new FileStream(Path.Combine(folderLocation, "AccessTeamTemplatesMetadata.xml"), FileMode.Open, FileAccess.Read, FileShare.Read))
+                {
+                    master.AccessTeamTemplates = (List<Entity>)entitySerializer.ReadObject(stream);
+                }
+
+                entitySerializer = new DataContractSerializer(typeof(List<MetaPlugin>));
+                using (var stream = new FileStream(Path.Combine(folderLocation, "PluginsMetadata.xml"), FileMode.Open, FileAccess.Read, FileShare.Read))
+                {
+                    master.Plugins = (List<MetaPlugin>)entitySerializer.ReadObject(stream);
+                }
+
+                entitySerializer = new DataContractSerializer(typeof(OptionSetMetadataBase[]));
+                using (var stream = new FileStream(Path.Combine(folderLocation, "OptionSetsMetadata.xml"), FileMode.Open, FileAccess.Read, FileShare.Read))
+                {
+                    master.OptionSets = (OptionSetMetadataBase[])entitySerializer.ReadObject(stream);
+                }
+
+
+
+                foreach (var file in Directory.GetFiles(folderLocation, "*AdditionalMetadata.xml"))
+                {
+                    entitySerializer = new DataContractSerializer(typeof(MetadataSkeleton));
+                    using (var stream = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.Read))
+                    {
+                        master.Merge((MetadataSkeleton)entitySerializer.ReadObject(stream));
+                    }
+                }
+
+            }
+            else
+            {
+
+
+                var metaDataFiles = Directory.GetFiles(folderLocation, "*Metadata.xml");
+                var serializer = new DataContractSerializer(typeof(MetadataSkeleton));
+                using (var stream = new FileStream(pathToMetadata, FileMode.Open, FileAccess.Read, FileShare.Read))
+                {
+                    master = (MetadataSkeleton)serializer.ReadObject(stream);
+                }
+
+                foreach (var file in metaDataFiles.Where(x => Path.GetFileName(x) != Path.GetFileName(pathToMetadata)))
+                {
+                    serializer = new DataContractSerializer(typeof(MetadataSkeleton));
+                    using (var stream = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.Read))
+                    {
+                        master.Merge((MetadataSkeleton)serializer.ReadObject(stream));
+                    }
                 }
             }
 
