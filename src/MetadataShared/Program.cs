@@ -216,7 +216,7 @@ namespace DG.Tools.XrmMockup.Metadata
             }
 
             Console.WriteLine("\tSecurity Roles");
-            var securityRoles = generator.GetSecurityRoles(skeleton.RootBusinessUnit.Id,true);
+            var securityRoles = generator.GetSecurityRoles(skeleton.RootBusinessUnit.Id);
             foreach (var securityRole in securityRoles)
             {
                 var safeName = ToSafeName(securityRole.Value.Name);
