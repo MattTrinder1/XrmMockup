@@ -104,6 +104,17 @@ namespace DG.Tools.XrmMockup.Metadata
             Abbreviations = new string[] { }
         };
 
+        public static ArgumentDescription SeperateFiles = new ArgumentDescription()
+        {
+            Name = "seperateFiles",
+            Abbreviations = new string[] { }
+        };
+        public static ArgumentDescription SeperateEntityFiles = new ArgumentDescription()
+        {
+            Name = "seperateEntityFiles",
+            Abbreviations = new string[] { }
+        };
+
         public static ArgumentDescription[] ArgList = new ArgumentDescription[] {
             Url,
             Username,
@@ -120,7 +131,9 @@ namespace DG.Tools.XrmMockup.Metadata
             ReturnUrl,
             ClientSecret,
             ConnectionString,
-            MitigateDuplicateSecurityRoles
+            SeperateFiles,
+            SeperateEntityFiles
         };
+
     }
 }
