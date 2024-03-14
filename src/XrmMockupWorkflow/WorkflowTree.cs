@@ -1387,8 +1387,7 @@ namespace WorkflowExecuter
             this.Result = Result;
         }
 
-        public void Execute(ref Dictionary<string, object> variables, TimeSpan timeOffset,
-            IOrganizationService orgService, IOrganizationServiceFactory factory, ITracingService trace)
+        public void Execute(ref Dictionary<string, object> variables, TimeSpan timeOffset, IOrganizationService orgService, IOrganizationServiceFactory factory, ITracingService trace)
         {
 
             if (!variables.ContainsKey(Input))
@@ -1418,9 +1417,16 @@ namespace WorkflowExecuter
                         variables[Result] = variables[Input];
                         break;
                     }
+                    else
+                    {
+                        variables[Result] = Convert.ChangeType(variables[Input], (TypeCode)Enum.Parse(typeof(TypeCode), Type));
+                        break;
+                    }
                     throw new NotImplementedException($"Unknown input when trying to convert type {variables[Input].GetType().Name} to {Type}");
             }
         }
+
+
     }
 
 
