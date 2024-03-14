@@ -240,6 +240,9 @@ namespace WorkflowExecuter
                 case "Decimal":
                     variables[VariableName] = decimal.Parse((string)Parameters[0][1]);
                     break;
+                case "Double":
+                    variables[VariableName] = double.Parse((string)Parameters[0][1]);
+                    break;
                 case "OptionSetValue":
                     variables[VariableName] = new OptionSetValue(int.Parse((string)Parameters[0][1]));
                     break;
