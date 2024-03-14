@@ -90,15 +90,15 @@ public class XrmMockupFixtureNoProxyTypes : IDisposable
         new MetaPlugin()
         {
 #if XRM_MOCKUP_TEST_2011
-            PluginTypeAssemblyName = "TestPluginAssembly11",
+            PluginAssemblyName = "TestPluginAssembly11",
 #elif XRM_MOCKUP_TEST_2013
-            PluginTypeAssemblyName = "TestPluginAssembly13",
+            PluginAssemblyName = "TestPluginAssembly13",
 #elif XRM_MOCKUP_TEST_2015
-            PluginTypeAssemblyName = "TestPluginAssembly15",
+            PluginAssemblyName = "TestPluginAssembly15",
 #elif XRM_MOCKUP_TEST_2016
-            PluginTypeAssemblyName = "TestPluginAssembly16",
+            PluginAssemblyName = "TestPluginAssembly16",
 #elif XRM_MOCKUP_TEST_365
-            PluginTypeAssemblyName = "TestPluginAssembly365",
+            PluginAssemblyName = "TestPluginAssembly365",
 #endif
             AssemblyName = "DG.Some.Namespace.ContactIPluginDirectPreOp",
             MessageName = "Create",
@@ -109,15 +109,15 @@ public class XrmMockupFixtureNoProxyTypes : IDisposable
         new MetaPlugin()
         {
 #if XRM_MOCKUP_TEST_2011
-            PluginTypeAssemblyName = "TestPluginAssembly11",
+            PluginAssemblyName = "TestPluginAssembly11",
 #elif XRM_MOCKUP_TEST_2013
-            PluginTypeAssemblyName = "TestPluginAssembly13",
+            PluginAssemblyName = "TestPluginAssembly13",
 #elif XRM_MOCKUP_TEST_2015
-            PluginTypeAssemblyName = "TestPluginAssembly15",
+            PluginAssemblyName = "TestPluginAssembly15",
 #elif XRM_MOCKUP_TEST_2016
-            PluginTypeAssemblyName = "TestPluginAssembly16",
+            PluginAssemblyName = "TestPluginAssembly16",
 #elif XRM_MOCKUP_TEST_365
-            PluginTypeAssemblyName = "TestPluginAssembly365",
+            PluginAssemblyName = "TestPluginAssembly365",
 #endif
             AssemblyName = "DG.Some.Namespace.ContactIPluginDirectPostOp",
             MessageName = "Create",

@@ -135,7 +135,7 @@ namespace DG.Tools.XrmMockup
                     plugins
                     .Where(x =>
                         x.AssemblyName == basePluginType.FullName &&
-                        x.PluginTypeAssemblyName == basePluginType.Assembly.GetName().Name)
+                        x.PluginAssemblyName == basePluginType.Assembly.GetName().Name)
                     .ToList();
 
                 // fallback for backwards compatability for old Metadata files

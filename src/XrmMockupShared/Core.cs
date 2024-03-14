@@ -198,7 +198,9 @@ namespace DG.Tools.XrmMockup
             new RetrieveVersionRequestHandler(this, db, metadata, security),
             new FetchXmlToQueryExpressionRequestHandler(this, db, metadata, security),
             new ExecuteMultipleRequestHandler(this, db, metadata, security),
+#if (!(XRM_MOCKUP_2011 || XRM_MOCKUP_2013))
             new ExecuteTransactionRequestHandler(this, db, metadata, security),
+#endif
             new RetrieveEntityRequestHandler(this, db, metadata, security),
             new RetrieveRelationshipRequestHandler(this, db, metadata, security),
             new GrantAccessRequestHandler(this, db, metadata, security),
@@ -555,7 +557,7 @@ namespace DG.Tools.XrmMockup
             }
         }
 
-        #endregion
+#endregion
 
         /// <summary>
         /// Execute the request and trigger plugins if needed
@@ -1139,7 +1141,7 @@ namespace DG.Tools.XrmMockup
             return metadata.EntityMetadata[entityLogicalName];
         }
 
-      #if !(XRM_MOCKUP_2011 || XRM_MOCKUP_2013)
+#if !(XRM_MOCKUP_2011 || XRM_MOCKUP_2013)
         internal void ExecuteCalculatedFields(DbRow row)
         {
             var attributes = row.Metadata.Attributes.Where(
