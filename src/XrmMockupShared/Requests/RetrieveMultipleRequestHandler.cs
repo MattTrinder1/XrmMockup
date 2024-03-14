@@ -158,7 +158,14 @@ namespace DG.Tools.XrmMockup {
             }
 
             // According to docs, should return -1 if ReturnTotalRecordCount set to false
-            colToReturn.TotalRecordCount = queryExpr.PageInfo.ReturnTotalRecordCount ? colToReturn.Entities.Count : -1;
+            if (queryExpr.PageInfo is null)
+            {
+                colToReturn.TotalRecordCount = colToReturn.Entities.Count;
+            }
+            else
+            {
+                colToReturn.TotalRecordCount = queryExpr.PageInfo.ReturnTotalRecordCount ? colToReturn.Entities.Count : -1;
+            }
 
             var resp = new RetrieveMultipleResponse();
 
