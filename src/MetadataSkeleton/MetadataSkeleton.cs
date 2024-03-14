@@ -3,42 +3,32 @@ using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Metadata;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
-namespace DG.Tools.XrmMockup {
+namespace DG.Tools.XrmMockup
+{
 
-    public class MetadataSkeleton {
+    public class MetadataSkeleton
+    {
         public Dictionary<string, EntityMetadata> EntityMetadata;
         public List<Entity> Currencies;
         public Entity BaseOrganization;
         public Entity RootBusinessUnit;
         public List<MetaPlugin> Plugins;
         public OptionSetMetadataBase[] OptionSets;
-        public Dictionary<string, Dictionary<int,int>> DefaultStateStatus;
+        public Dictionary<string, Dictionary<int, int>> DefaultStateStatus;
         public List<Entity> AccessTeamTemplates;
 
         public void Merge(MetadataSkeleton metadata)
         {
             foreach (var kvp in metadata.EntityMetadata)
             {
-                if (this.EntityMetadata.ContainsKey(kvp.Key)) continue;
-                
-                this.EntityMetadata.Add(kvp.Key, kvp.Value);
-
-                //also need to merge the default state and status for this entity
-                if (metadata.DefaultStateStatus.ContainsKey(kvp.Key)) { 
-                    var defaultSS = metadata.DefaultStateStatus[kvp.Key];
-                    var dict = new Dictionary<int, int>();
-                    foreach (var kvp2 in defaultSS)
-                    {
-                        dict.Add(kvp2.Key, kvp2.Value);
-                    }
-
-                    this.DefaultStateStatus.Add(kvp.Key, dict);
-                }
-
-                if (metadata.DefaultStateStatus.ContainsKey(kvp.Key))
+                if (!this.EntityMetadata.ContainsKey(kvp.Key))
                 {
-                    if (!this.DefaultStateStatus.ContainsKey(kvp.Key))
+                    this.EntityMetadata.Add(kvp.Key, kvp.Value);
+
+                    //also need to merge the default state and status for this entity
+                    if (metadata.DefaultStateStatus.ContainsKey(kvp.Key))
                     {
                         var defaultSS = metadata.DefaultStateStatus[kvp.Key];
                         var dict = new Dictionary<int, int>();
@@ -63,7 +53,7 @@ namespace DG.Tools.XrmMockup {
         public int Stage;
         public string MessageName;
         public string AssemblyName;
-        public string PluginTypeAssemblyName;
+        public string PluginAssemblyName;
         public string PrimaryEntity;
         public List<MetaImage> Images;
         public Guid? ImpersonatingUserId;
@@ -78,7 +68,8 @@ namespace DG.Tools.XrmMockup {
     }
 
 
-    public class RolePrivilege {
+    public class RolePrivilege
+    {
         public bool CanBeGlobal;
         public bool CanBeDeep;
         public bool CanBeLocal;
@@ -100,7 +91,8 @@ namespace DG.Tools.XrmMockup {
         }
     }
 
-    public class SecurityRole {
+    public class SecurityRole
+    {
         public Dictionary<string, Dictionary<AccessRights, RolePrivilege>> Privileges;
         public string Name;
         public EntityReference BusinessUnitId;
@@ -132,3 +124,4 @@ namespace DG.Tools.XrmMockup {
         }
     }
 }
+
