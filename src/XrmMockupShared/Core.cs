@@ -183,6 +183,7 @@ namespace DG.Tools.XrmMockup
                 new RetrieveVersionRequestHandler(this, db, metadata, security),
                 new FetchXmlToQueryExpressionRequestHandler(this, db, metadata, security),
                 new ExecuteMultipleRequestHandler(this, db, metadata, security),
+                new ExecuteTransactionRequestHandler(this, db, metadata, security),
                 new RetrieveEntityRequestHandler(this, db, metadata, security),
                 new RetrieveRelationshipRequestHandler(this, db, metadata, security),
                 new GrantAccessRequestHandler(this, db, metadata, security),
