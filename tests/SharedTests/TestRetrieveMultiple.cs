@@ -125,7 +125,6 @@ namespace DG.XrmMockupTest
         }
 
         // ignored until entityname can be handled correctly for 2011
-#if !(XRM_MOCKUP_TEST_2011)
         [Fact]
         public void TestFilterOnJoin()
         {
@@ -142,7 +141,6 @@ namespace DG.XrmMockupTest
                 Assert.Equal(2, result.Count());
             }
         }
-#endif
         [Fact]
         public void TestAllColumns()
         {
@@ -681,7 +679,6 @@ namespace DG.XrmMockupTest
             Assert.Equal(leadCount, res.Count());
         }
 
-#if !(XRM_MOCKUP_TEST_2011)
 
         [Fact]
         public void TestQueryExpressionLinkEntity()
@@ -773,7 +770,6 @@ namespace DG.XrmMockupTest
             Assert.Equal(2, res.Count());
         }
 
-#endif
 
         [Fact]
         public void RetrieveMultipleWithQueryByAttribute()

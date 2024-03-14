@@ -1,5 +1,4 @@
-﻿#if (XRM_MOCKUP_TEST_365)
-
+﻿
 using System;
 using Microsoft.Xrm.Sdk.Query;
 using DG.Tools.XrmMockup;
@@ -39,4 +38,3 @@ namespace DG.XrmMockupTest
         }
     }
 }
-#endif

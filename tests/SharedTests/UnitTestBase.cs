@@ -47,17 +47,7 @@ namespace DG.XrmMockupTest
 
         protected Entity contactWriteAccessTeamTemplate;
 
-#if XRM_MOCKUP_TEST_2011
-        static protected XrmMockup2011 crm;
-#elif XRM_MOCKUP_TEST_2013
-        static protected XrmMockup2013 crm;
-#elif XRM_MOCKUP_TEST_2015
-        static protected XrmMockup2015 crm;
-#elif XRM_MOCKUP_TEST_2016
-        static protected XrmMockup2016 crm;
-#elif XRM_MOCKUP_TEST_365
         static protected XrmMockup365 crm;
-#endif
 
         public UnitTestBase(XrmMockupFixture fixture)
         {

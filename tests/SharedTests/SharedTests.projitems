@@ -33,7 +33,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)TestValidateUnchangedLookups.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TestRetrieveNoProxyTypes.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TestRetrievePrincipalAccess.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)TestSecurity.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TestSyncAsyncWorkflow.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TestSyncAsyncPlugin.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TestDefaultBusinessUnitTeams.cs" />
