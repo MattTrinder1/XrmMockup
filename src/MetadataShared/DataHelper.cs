@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.ServiceModel;
+using static DG.Tools.XrmMockup.MetadataSkeleton;
 
 namespace DG.Tools.XrmMockup.Metadata
 {
@@ -36,7 +37,8 @@ namespace DG.Tools.XrmMockup.Metadata
                 this.EntityLogicalNames = GetLogicalNames(AssemblyGetter.GetAssembliesInBuildPath());
 
             // Add default entities
-            var defaultEntities = new string[] { "businessunit", "systemuser", "transactioncurrency", "role", "systemuserroles", "team", "teamroles", "activitypointer", "roletemplate" };
+            var defaultEntities = new string[] { "businessunit", "systemuser", "transactioncurrency", "role", "systemuserroles", "teamroles", "activitypointer", "roletemplate", "teamtemplate", "principalobjectaccess", "team" };
+            //var defaultEntities = new string[] { "roletemplate", "teamtemplate", "principalobjectaccess" };
             foreach (var logicalName in defaultEntities)
             {
                 this.EntityLogicalNames.Add(logicalName);
@@ -78,6 +80,9 @@ namespace DG.Tools.XrmMockup.Metadata
             Console.WriteLine("Getting Default state and status");
             skeleton.DefaultStateStatus = GetDefaultStateAndStatus();
 
+            Console.WriteLine("Getting Access Team Templates");
+            skeleton.AccessTeamTemplates = GetAccessTeamTemplates();
+
             return skeleton;
         }
 
@@ -116,6 +121,21 @@ namespace DG.Tools.XrmMockup.Metadata
             return entityMetadata;
         }
 
+        private List<Entity> GetAccessTeamTemplates()
+        {
+            var q = new QueryExpression("teamtemplate");
+            q.ColumnSet = new ColumnSet(true);
+            var tts = service.RetrieveMultiple(q);
+            if (tts.Entities != null && tts.Entities.Any())
+            {
+                return new List<Entity>(tts.Entities);
+            }
+            else
+            {
+                return new List<Entity>();
+            }
+        }
+
         private List<MetaPlugin> GetPlugins(string[] solutions)
         {
             var plugins = new List<MetaPlugin>();
@@ -141,7 +161,7 @@ namespace DG.Tools.XrmMockup.Metadata
                     Stage = pluginStep.GetAttributeValue<OptionSetValue>("stage").Value,
                     MessageName = pluginStep.GetAttributeValue<EntityReference>("sdkmessageid").Name,
                     AssemblyName = pluginStep.GetAttributeValue<EntityReference>("eventhandler").Name,
-                    PluginTypeAssemblyName = pluginStep.GetAttributeValue<AliasedValue>("plugintype.assemblyname").Value.ToString(),
+                    PluginAssemblyName = pluginStep.GetAttributeValue<AliasedValue>("plugintype.assemblyname").Value.ToString(),
                     ImpersonatingUserId = pluginStep.Contains("impersonatinguserid") ? pluginStep.GetAttributeValue<EntityReference>("impersonatinguserid").Id : (Guid?)null,
                     PrimaryEntity = pluginStep.GetAttributeValue<AliasedValue>("sdkmessagefilter.primaryobjecttypecode")?.Value as string ?? "",  // In case of AnyEntity use ""
                     Images = images.Entities
@@ -155,11 +175,12 @@ namespace DG.Tools.XrmMockup.Metadata
                         })
                         .ToList()
                 };
+                plugins.Add(metaPlugin);
+
                 if (metaPlugin.PrimaryEntity == "none")
                 {
                     metaPlugin.PrimaryEntity = "";
                 }
-                plugins.Add(metaPlugin);
             }
             return plugins;
         }
@@ -168,9 +189,8 @@ namespace DG.Tools.XrmMockup.Metadata
         {
             var pluginQuery = new QueryExpression("sdkmessageprocessingstep")
             {
-                ColumnSet = new ColumnSet("eventhandler", "stage", "mode", "rank", "sdkmessageid", "filteringattributes", "name", "impersonatinguserid", "sdkmessageprocessingstepid"),
-                Criteria = new FilterExpression(),
-                Distinct = true,
+                ColumnSet = new ColumnSet("eventhandler", "stage", "mode", "rank", "sdkmessageid", "filteringattributes", "name", "impersonatinguserid"),
+                Criteria = new FilterExpression()
             };
             pluginQuery.Criteria.AddCondition("statecode", ConditionOperator.Equal, 0);
 
@@ -244,6 +264,7 @@ namespace DG.Tools.XrmMockup.Metadata
             var images = service.RetrieveMultiple(imagesQuery);
             return images;
         }
+
 
         private List<Entity> GetCurrencies()
         {
@@ -408,7 +429,7 @@ namespace DG.Tools.XrmMockup.Metadata
                 .Select(e => e.ToEntity<Entity>());
         }
 
-        internal Dictionary<Guid, SecurityRole> GetSecurityRoles(Guid rootBUId, bool mitigateDuplicateNames)
+        internal Dictionary<Guid, SecurityRole> GetSecurityRoles(Guid rootBUId)
         {
             // Queries
             var privQuery = new QueryExpression(PRIVILEGE)
@@ -466,12 +487,9 @@ namespace DG.Tools.XrmMockup.Metadata
                 (e.rpr?.roleprivilege?.Contains("roleid")).GetValueOrDefault() &&
                 (e.rpr?.role?.Contains("name")).GetValueOrDefault());
 
-            var roleNameCounters = new Dictionary<string, int>();
-
             foreach (var e in validSecurityRoles)
             {
                 var entityName = (string)e.pp.privilegeOTC["objecttypecode"];
-
                 if (entityName == "none") continue;
 
                 var rp = ToRolePrivilege(e.pp.privilege, e.rpr.roleprivilege);
@@ -479,26 +497,9 @@ namespace DG.Tools.XrmMockup.Metadata
                 var roleId = (Guid)e.rpr.roleprivilege["roleid"];
                 if (!roles.ContainsKey(roleId))
                 {
-                    var name = (string)e.rpr.role["name"];
-
-                    if (mitigateDuplicateNames) {
-                        if (roleNameCounters.TryGetValue(name, out var count))
-                        {
-                            // Role name has been seen before, warn, add and increment counter
-                            Console.WriteLine("*** WARNING: DUPLICATE SECURITY ROLE NAME DETECTED: \"{0}\" ***", name);
-                            Console.WriteLine("*** IF THIS IS NO ON PURPOSE - REACH OUT TO MICROSOFT SUPPORT ***");
-                            name += $"_{++count}";
-                            roleNameCounters[name] = count;
-                        }
-                        else
-                        {
-                            roleNameCounters[name] = 1;
-                        }
-                    }
-
                     roles[roleId] = new SecurityRole()
                     {
-                        Name = name,
+                        Name = (string)e.rpr.role["name"],
                         RoleId = roleId
                     };
 
@@ -515,10 +516,7 @@ namespace DG.Tools.XrmMockup.Metadata
                     roles[roleId].Privileges.Add(entityName, new Dictionary<AccessRights, RolePrivilege>());
                 }
 
-                if(!roles[roleId].Privileges[entityName].ContainsKey(rp.AccessRight))
-                {
-                    roles[roleId].Privileges[entityName].Add(rp.AccessRight, rp);
-                }                
+                roles[roleId].Privileges[entityName].Add(rp.AccessRight, rp);
             }
             return roles;
         }
