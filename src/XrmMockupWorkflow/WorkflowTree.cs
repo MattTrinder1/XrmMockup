@@ -12,6 +12,7 @@ using Microsoft.Xrm.Sdk.Workflow;
 using DG.Tools.XrmMockup;
 using Microsoft.Xrm.Sdk.Metadata;
 using System.Text;
+using System.Runtime.CompilerServices;
 
 namespace WorkflowExecuter
 {
@@ -319,6 +320,14 @@ namespace WorkflowExecuter
                             .Select(r => orgService.Retrieve(r.LogicalName, r.Id, new ColumnSet(true)));
                         variables[VariableName] = new EntityCollection(entities.ToList());
                     }
+                    break;
+                case "Dictionary(x:String, x:Object)":
+                    {
+                        var variablesInstance = variables;
+                        variables[VariableName] = new Dictionary<string, object>();
+
+                    }
+
                     break;
                 default:
                     throw new WorkflowException($"Unknown target type: {TargetType}.");
@@ -937,6 +946,9 @@ namespace WorkflowExecuter
         public void Execute(ref Dictionary<string, object> variables, TimeSpan timeOffset,
             IOrganizationService orgService, IOrganizationServiceFactory factory, ITracingService trace)
         {
+
+            trace.Trace($"Execute : {this.GetType().ToString()}");
+
             Entity entity = null;
             if (EntityId.Contains("related_"))
             {
@@ -1513,6 +1525,11 @@ namespace WorkflowExecuter
                 {
                     // TODO: what format does CRM do?
                     attr = $"{time:g}";
+                }
+                else if (attr is Guid guid)
+                {
+                    // TODO: what format does CRM do?
+                    attr = guid.ToString();
                 }
                 else if (attr != null && !(attr is string))
                 {
