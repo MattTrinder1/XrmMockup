@@ -4,6 +4,7 @@
         <TargetFrameworks>net462;net6.0</TargetFrameworks>
         <DebugType>portable</DebugType>
         <Title>XrmMockup365</Title>
+        <Configurations>Debug;Release;XRMMOCKUP</Configurations>
     </PropertyGroup>
     <PropertyGroup>
         <PackageProjectUrl>http://delegateas.github.io/</PackageProjectUrl>
@@ -22,6 +23,12 @@
         <OutputPath>bin\Debug\</OutputPath>
         <DefineConstants>TRACE;DEBUG;XRM_MOCKUP_365</DefineConstants>
         <ErrorReport>prompt</ErrorReport>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='XRMMOCKUP|AnyCPU'">
+      <Optimize>false</Optimize>
+      <OutputPath>bin\Debug\</OutputPath>
+      <DefineConstants>TRACE;DEBUG;XRM_MOCKUP_365</DefineConstants>
+      <ErrorReport>prompt</ErrorReport>
     </PropertyGroup>
     <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
         <Optimize>true</Optimize>
