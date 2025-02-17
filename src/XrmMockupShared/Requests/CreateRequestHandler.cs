@@ -209,6 +209,57 @@ namespace DG.Tools.XrmMockup
             clonedEntity["versionnumber"] = Convert.ToDecimal(DateTime.Now.Ticks);
             clonedEntity.RowVersion = Convert.ToString(DateTime.Now.Ticks);
 
+            foreach (var autoNumAttr in entityMetadata.Attributes.Where(x => !(string.IsNullOrEmpty(x.AutoNumberFormat))))
+            {
+                //don't autonumber the value if we already have a value populated
+                if (clonedEntity.Contains(autoNumAttr.LogicalName) && !string.IsNullOrEmpty(clonedEntity.GetAttributeValue<string>(autoNumAttr.LogicalName)))
+                {
+                }
+                else
+                {
+                    var a = 1;
+                    var stringToFormat = autoNumAttr.AutoNumberFormat;
+                    //seqnum
+                    if (stringToFormat.Contains("{SEQNUM"))
+                    {
+                        //get the length of the string to format
+                        var index = stringToFormat.IndexOf("{SEQNUM:");
+                        var index2 = stringToFormat.IndexOf("}");
+                        var length = stringToFormat.Substring(index + 8, index2 - index - 8);
+                        var nextSeqNum = core.GetDbTable(clonedEntity.LogicalName).Select(x => x[autoNumAttr.LogicalName] as string).ToList();
+
+                        int nextNum = 1;
+
+                        if (nextSeqNum.Any())
+                        {
+                            var desc = nextSeqNum.OrderByDescending(x => x);
+                            var largest = desc.First();
+                            //parse the number out of this
+                            nextNum = Convert.ToInt32(largest.Substring(4, Convert.ToInt32(length)));
+                            nextNum++;
+                        }
+
+
+                        stringToFormat = stringToFormat.Replace("{SEQNUM:" + length.ToString() + "}", nextNum.ToString(string.Join("", Enumerable.Repeat("0", Convert.ToInt32(length)))));
+                    }
+                    //randstring
+                    if (stringToFormat.Contains("RANDSTRING"))
+                    {
+                        var index = stringToFormat.IndexOf("{RANDSTRING:");
+                        var index2 = stringToFormat.IndexOf("}");
+                        var length = stringToFormat.Substring(index + 12, index2 - index - 12);
+                        var randString = GenerateRandString(Convert.ToInt32(length));
+
+                        stringToFormat = stringToFormat.Replace("{RANDSTRING:" + length.ToString() + "}", randString);
+
+                    }
+                    clonedEntity[autoNumAttr.LogicalName] = stringToFormat;
+                }
+
+            }
+
+            
+
             if (clonedEntity.LogicalName == LogicalNames.BusinessUnit)
             {
                 CheckBusinessUnitAttributes(clonedEntity, settings);
@@ -300,6 +351,18 @@ namespace DG.Tools.XrmMockup
             return resp;
         }
 
+        private static string GenerateRandString(int length)
+        {
+            const string alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+
+            var rnd = new Random();
+
+            return new String(
+                alphabet
+                .OrderBy(x => rnd.Next())
+                .Take(length)
+                .ToArray());
+        }
         private void CheckBusinessUnitAttributes(Entity clonedEntity, MockupServiceSettings settings)
         {
             if (!clonedEntity.Attributes.ContainsKey("parentbusinessunitid"))
