@@ -206,6 +206,9 @@ namespace DG.Tools.XrmMockup
                 clonedEntity["businessunitid"] = metadata.RootBusinessUnit.ToEntityReference();
             }
 
+            clonedEntity["versionnumber"] = Convert.ToDecimal(DateTime.Now.Ticks);
+            clonedEntity.RowVersion = Convert.ToString(DateTime.Now.Ticks);
+
             if (clonedEntity.LogicalName == LogicalNames.BusinessUnit)
             {
                 CheckBusinessUnitAttributes(clonedEntity, settings);
