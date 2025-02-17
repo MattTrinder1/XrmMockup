@@ -162,6 +162,7 @@ namespace DG.Tools.XrmMockup.Metadata
                     MessageName = pluginStep.GetAttributeValue<EntityReference>("sdkmessageid").Name,
                     AssemblyName = pluginStep.GetAttributeValue<EntityReference>("eventhandler").Name,
                     PluginAssemblyName = pluginStep.GetAttributeValue<AliasedValue>("plugintype.assemblyname").Value.ToString(),
+                    IsolationMode = ((OptionSetValue)pluginStep.GetAttributeValue<AliasedValue>("pluginassembly.isolationmode").Value).Value,
                     ImpersonatingUserId = pluginStep.Contains("impersonatinguserid") ? pluginStep.GetAttributeValue<EntityReference>("impersonatinguserid").Id : (Guid?)null,
                     PrimaryEntity = pluginStep.GetAttributeValue<AliasedValue>("sdkmessagefilter.primaryobjecttypecode")?.Value as string ?? "",  // In case of AnyEntity use ""
                     Images = images.Entities
@@ -189,7 +190,7 @@ namespace DG.Tools.XrmMockup.Metadata
         {
             var pluginQuery = new QueryExpression("sdkmessageprocessingstep")
             {
-                ColumnSet = new ColumnSet("eventhandler", "stage", "mode", "rank", "sdkmessageid", "filteringattributes", "name", "impersonatinguserid"),
+                ColumnSet = new ColumnSet(true),
                 Criteria = new FilterExpression()
             };
             pluginQuery.Criteria.AddCondition("statecode", ConditionOperator.Equal, 0);
@@ -209,6 +210,14 @@ namespace DG.Tools.XrmMockup.Metadata
                 LinkCriteria = new FilterExpression()
             };
             pluginQuery.LinkEntities.Add(pluginTypeFilterQuery);
+            
+            var pluginAssemblyFilterQuery = new LinkEntity("plugintype", "pluginassembly", "pluginassemblyid", "pluginassemblyid", JoinOperator.LeftOuter)
+            {
+                Columns = new ColumnSet("isolationmode"),
+                EntityAlias = "pluginassembly",
+                LinkCriteria = new FilterExpression()
+            };
+            pluginTypeFilterQuery.LinkEntities.Add(pluginAssemblyFilterQuery);
 
             var solutionComponentQuery = new LinkEntity("sdkmessageprocessingstep", "solutioncomponent", "sdkmessageprocessingstepid", "objectid", JoinOperator.Inner)
             {

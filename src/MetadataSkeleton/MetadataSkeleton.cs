@@ -54,6 +54,7 @@ namespace DG.Tools.XrmMockup
         public string MessageName;
         public string AssemblyName;
         public string PluginAssemblyName;
+        public int IsolationMode;
         public string PrimaryEntity;
         public List<MetaImage> Images;
         public Guid? ImpersonatingUserId;
