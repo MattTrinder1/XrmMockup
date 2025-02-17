@@ -85,13 +85,13 @@ namespace DG.Tools.XrmMockup.Metadata
             Directory.CreateDirectory(workflowsLocation);
             foreach (var file in Directory.EnumerateFiles(workflowsLocation, "*.xml"))
             {
-                File.Delete(Path.Combine(workflowsLocation, file));
+                File.Delete(file);
             }
 
             Directory.CreateDirectory(securityLocation);
             foreach (var file in Directory.EnumerateFiles(securityLocation, "*.xml"))
             {
-                File.Delete(Path.Combine(securityLocation, file));
+                File.Delete(file);
             }
 
             Console.WriteLine("Writing files");
@@ -105,14 +105,14 @@ namespace DG.Tools.XrmMockup.Metadata
                 {
                     if (Path.GetFileName(file).ToLower() != "additionalmetadata.xml")
                     {
-                        File.Delete(Path.Combine(securityLocation, file));
+                        File.Delete(file);
                     }
 
                 }
 
                 foreach (var file in Directory.EnumerateFiles(entityLocation, "*Metadata.xml"))
                 {
-                    File.Delete(Path.Combine(entityLocation, file));
+                    File.Delete(file);
                 }
 
 
