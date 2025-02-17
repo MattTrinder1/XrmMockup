@@ -24,7 +24,7 @@ namespace DG.Tools.XrmMockup.SystemPlugins
             RegisterPluginStep("annotation",
                 PluginEventOperation.Update,
                 PluginExecutionStage.PreOperation,
-                Execute);
+                Execute, "documentbody");
         }
 
         // Execute plugin logic
