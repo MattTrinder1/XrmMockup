@@ -27,6 +27,9 @@ namespace DG.Tools.XrmMockup {
 
         private Queue<WorkflowExecutionContext> pendingAsyncWorkflows;
 
+        private bool disableWorkflows = false;
+
+
         public WorkflowManager(IEnumerable<Type> codeActivityInstances, bool? IncludeAllWorkflows, List<Entity> mixedWorkflows, Dictionary<string, EntityMetadata> metadata) {
             this.metadata = metadata;
             this.actions = mixedWorkflows.Where(w => w.GetAttributeValue<OptionSetValue>("category").Value == 3).ToList();
@@ -83,6 +86,11 @@ namespace DG.Tools.XrmMockup {
             {
                 Execute(workflow, operation, entity, preImage, postImage, pluginContext, core);
             }
+        }
+
+        public void DisableWorkflows(bool include)
+        { 
+            disableWorkflows = include;
         }
 
 
@@ -277,6 +285,9 @@ namespace DG.Tools.XrmMockup {
 
         private bool ShouldExecute(Entity workflow, string operation, ExecutionStage stage, object entityObject, PluginContext pluginContext)
         {
+
+            if (disableWorkflows) return false; 
+
             // Check if it is supposed to execute. Returns preemptively, if it should not.
             if (workflow.LogicalName != "workflow") return false;
             var entity = entityObject as Entity;

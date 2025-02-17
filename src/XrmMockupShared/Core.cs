@@ -1009,11 +1009,15 @@ namespace DG.Tools.XrmMockup
         {
             return Utility.GetBusinessUnit(db, owner);
         }
-#endregion
+        #endregion
 
         internal void DisabelRegisteredPlugins(bool include)
         {
             pluginManager.DisabelRegisteredPlugins(include);
+        }
+        internal void DisabelWorkflows(bool include)
+        {
+            workflowManager.DisableWorkflows(include);
         }
 
         internal XrmMockupSettings GetMockupSettings()

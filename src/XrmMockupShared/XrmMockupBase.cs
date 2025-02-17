@@ -405,6 +405,10 @@ namespace DG.Tools.XrmMockup
         {
             Core.DisabelRegisteredPlugins(include);
         }
+        public void DisableWorkflows(bool include)
+        {
+            Core.DisabelWorkflows(include);
+        }
 
         /// <summary>
         /// Register additional plugins to be triggered in addition to the existing plugins in the current environment.
