@@ -422,7 +422,7 @@ namespace WorkflowExecuter
             if (TargetType == "String" && Method == "Add")
             {
                 var strings = Parameters[0].Select(v => variablesInstance[v] as string);
-                variables[VariableName] = String.Concat(strings);
+                variables[VariableName] = String.Concat(strings).Trim();
                 return;
             }
 
@@ -1011,7 +1011,16 @@ namespace WorkflowExecuter
                 }
             }
 
-            variables[VariableName] = attr;
+            if (TargetType == "String" && attr is EntityReference)
+            {
+                variables[VariableName] = (attr as EntityReference).Name;
+            }
+            else
+            {
+                variables[VariableName] = attr;
+            }
+
+            
         }
     }
 
