@@ -191,7 +191,20 @@ namespace DG.Tools.XrmMockup.Database
 
 
         public EntityReference ToXrmEntityReference() {
-            return new EntityReference(Table.TableName, Id);
+            var reference = new EntityReference(Table.TableName, Id);
+
+            var primaryAttrMetadata = Table.Metadata.Attributes.SingleOrDefault(x => x.IsPrimaryName.Value == true);
+            if (primaryAttrMetadata != null) 
+            {
+                var primaryAttrName = primaryAttrMetadata.LogicalName;
+                //do we have this column available
+                if (Columns.ContainsKey(primaryAttrName))
+                {
+                    reference.Name = Columns[primaryAttrName].ToString();
+                }
+            }
+
+            return reference;
         }
 
         public DbRow Clone(DbTable table)
