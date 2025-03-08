@@ -323,9 +323,44 @@ namespace DG.Tools.XrmMockup
         public void TriggerSync(string operation, ExecutionStage stage,
                 object entity, Entity preImage, Entity postImage, PluginContext pluginContext, Core core)
         {
-            if (!disableRegisteredPlugins && registeredPlugins.ContainsKey(operation) && registeredPlugins[operation].ContainsKey(stage))
-                registeredPlugins[operation][stage].Where(p => p.GetExecutionMode() == ExecutionMode.Synchronous)
-                    .OrderBy(p => p.GetExecutionOrder()).ToList().ForEach(p => p.ExecuteIfMatch(entity, preImage, postImage, pluginContext, core));
+
+
+            if (!disableRegisteredPlugins)
+            {
+                var toExecute = new List<PluginTrigger>();
+
+                if (registeredPlugins.ContainsKey(operation))
+                {
+                    var opPlugins = registeredPlugins[operation];
+                    if (opPlugins.ContainsKey(stage))
+                    { 
+                        var opStagePlugins = opPlugins[stage];
+                        var syncPlugins = opStagePlugins.Where(x => x.GetExecutionMode() == ExecutionMode.Synchronous);
+
+                        foreach (var plugin in syncPlugins)
+                        {
+                            if (plugin.ShouldExecute(entity, preImage, postImage, pluginContext, core))
+                            { 
+                                toExecute.Add(plugin);
+                            }
+                        }
+
+                    }
+                }
+
+                foreach (var ex in toExecute.OrderBy(x=>x.GetExecutionOrder()))
+                {
+                    ex.ExecutePlugin(entity, preImage, postImage, pluginContext, core);
+                }
+                
+            
+            }
+
+            //if (!disableRegisteredPlugins && registeredPlugins.ContainsKey(operation) && registeredPlugins[operation].ContainsKey(stage))
+            //    registeredPlugins[operation][stage].Where(p => p.GetExecutionMode() == ExecutionMode.Synchronous)
+            //        .OrderBy(p => p.GetExecutionOrder()).ToList().ForEach(p => p.ExecuteIfMatch(entity, preImage, postImage, pluginContext, core));
+            
+            
             if (temporaryPlugins.ContainsKey(operation) && temporaryPlugins[operation].ContainsKey(stage))
                 temporaryPlugins[operation][stage].Where(p => p.GetExecutionMode() == ExecutionMode.Synchronous)
                     .OrderBy(p => p.GetExecutionOrder()).ToList().ForEach(p => p.ExecuteIfMatch(entity, preImage, postImage, pluginContext, core));
@@ -462,6 +497,50 @@ namespace DG.Tools.XrmMockup
                         pluginContext.SharedVariables[parameter.Key] = parameter.Value;
                     }
                 }
+            }
+
+            public void ExecutePlugin(object entityObject, Entity preImage, Entity postImage, PluginContext pluginContext, Core core)
+            {
+                // Check if it is supposed to execute. Returns preemptively, if it should not.
+                var entity = entityObject as Entity;
+                var entityRef = entityObject as EntityReference;
+
+                var guid = (entity != null) ? entity.Id : entityRef.Id;
+                var logicalName = (entity != null) ? entity.LogicalName : entityRef.LogicalName;
+
+                var thisPluginContext = CreatePluginContext(pluginContext, guid, logicalName, preImage, postImage);
+
+                //Create Serviceprovider, and execute plugin
+                MockupServiceProviderAndFactory provider = new MockupServiceProviderAndFactory(core, thisPluginContext, core.TracingServiceFactory);
+                try
+                {
+                    pluginExecute(provider);
+                }
+                catch (TargetInvocationException e)
+                {
+                    ExceptionDispatchInfo.Capture(e.InnerException).Throw();
+                }
+
+                foreach (var parameter in thisPluginContext.SharedVariables)
+                {
+                    pluginContext.SharedVariables[parameter.Key] = parameter.Value;
+                }
+            }
+
+            public bool ShouldExecute(object entityObject, Entity preImage, Entity postImage, PluginContext pluginContext, Core core)
+            {
+                // Check if it is supposed to execute. Returns preemptively, if it should not.
+                var entity = entityObject as Entity;
+                var entityRef = entityObject as EntityReference;
+
+                var guid = (entity != null) ? entity.Id : entityRef.Id;
+                var logicalName = (entity != null) ? entity.LogicalName : entityRef.LogicalName;
+
+                if (VerifyPluginTrigger(entity, logicalName, guid, preImage, postImage, pluginContext))
+                {
+                    return true;
+                }
+                return false;
             }
 
             private void CheckInfiniteLoop(PluginContext pluginContext)
