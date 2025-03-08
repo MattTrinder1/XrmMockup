@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <OutputType>Library</OutputType>
-        <TargetFrameworks>net462;net6.0</TargetFrameworks>
+        <TargetFrameworks>net462</TargetFrameworks>
         <DebugType>portable</DebugType>
         <Title>XrmMockup365</Title>
         <Configurations>Debug;Release;XRMMOCKUP</Configurations>
@@ -23,6 +23,12 @@
         <OutputPath>bin\Debug\</OutputPath>
         <DefineConstants>TRACE;DEBUG;XRM_MOCKUP_365</DefineConstants>
         <ErrorReport>prompt</ErrorReport>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='XRMMOCKUP|AnyCPU'">
+      <Optimize>false</Optimize>
+      <OutputPath>bin\Debug\</OutputPath>
+      <DefineConstants>TRACE;DEBUG;XRM_MOCKUP_365</DefineConstants>
+      <ErrorReport>prompt</ErrorReport>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='XRMMOCKUP|AnyCPU'">
       <Optimize>false</Optimize>
