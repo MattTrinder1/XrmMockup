@@ -1,6 +1,7 @@
 ﻿
 using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Configuration;
 using System.Text.RegularExpressions;
@@ -16,24 +17,51 @@ namespace DG.Tools.XrmMockup.Metadata
         private Dictionary<ArgumentDescription, string> ArgDescMap = new Dictionary<ArgumentDescription, string>();
 
 
-        public ArgumentParser(IEnumerable<ArgumentDescription> possibleArgs, IEnumerable<string> args) {
+        public ArgumentParser(IEnumerable<ArgumentDescription> possibleArgs, IEnumerable<string> args)
+        {
             // Build up abbreviation map to easily look up the ArgumentDescription of given arguments
-            foreach (var argDesc in possibleArgs) {
+            foreach (var argDesc in possibleArgs)
+            {
                 ArgToArgDesc[argDesc.Name.ToLower()] = argDesc;
-                foreach (var abbrv in argDesc.Abbreviations) {
+                foreach (var abbrv in argDesc.Abbreviations)
+                {
                     ArgToArgDesc[abbrv.ToLower()] = argDesc;
                 }
             }
 
             // Add arguments from config file
-            foreach (var key in ConfigurationManager.AppSettings.AllKeys) {
+            foreach (var key in ConfigurationManager.AppSettings.AllKeys)
+            {
                 AddArg(key, ConfigurationManager.AppSettings[key]);
             }
 
             // Parse command-line args
-            foreach (var arg in args) {
+            foreach (var arg in args)
+            {
                 ParseArg(arg);
             }
+        }
+
+        public ArgumentParser(IEnumerable<ArgumentDescription> possibleArgs, string configSectionName)
+        {
+            // Build up abbreviation map to easily look up the ArgumentDescription of given arguments
+            foreach (var argDesc in possibleArgs)
+            {
+                ArgToArgDesc[argDesc.Name.ToLower()] = argDesc;
+                foreach (var abbrv in argDesc.Abbreviations)
+                {
+                    ArgToArgDesc[abbrv.ToLower()] = argDesc;
+                }
+            }
+
+            // Add arguments from config file
+            var section = ConfigurationManager.GetSection(configSectionName) as NameValueCollection;
+
+            foreach (var key in section)
+            {
+                AddArg(key as string, section[key as string]);
+            }
+
         }
 
         private void ParseArg(string arg) {

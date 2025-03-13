@@ -40,7 +40,7 @@ namespace DG.Tools.XrmMockup.Metadata
 
         static void Main(string[] args)
         {
-            ParsedArgs = new ArgumentParser(Arguments.ArgList, args);
+            ParsedArgs = new ArgumentParser(Arguments.ArgList, args[0]);
 
             if (ParsedArgs.GetAsType<bool>(Arguments.fetchFromAssemblies))
             {
