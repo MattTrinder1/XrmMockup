@@ -309,61 +309,63 @@ namespace DG.Tools.XrmMockup
         /// <param name="postImage"></param>
         /// <param name="pluginContext"></param>
         /// <param name="core"></param>
-        public void Trigger(string operation, ExecutionStage stage,
-                object entity, Entity preImage, Entity postImage, PluginContext pluginContext, Core core)
-        {
-            if (!disableRegisteredPlugins && registeredPlugins.ContainsKey(operation) && registeredPlugins[operation].ContainsKey(stage))
-                registeredPlugins[operation][stage].ForEach(p => p.ExecuteIfMatch(entity, preImage, postImage, pluginContext, core));
-            if (temporaryPlugins.ContainsKey(operation) && temporaryPlugins[operation].ContainsKey(stage))
-                temporaryPlugins[operation][stage].ForEach(p => p.ExecuteIfMatch(entity, preImage, postImage, pluginContext, core));
-        }
-
-
+        /// <param name="syncOnly"></param>
         //Post operation - Trigger Sync and Async in that order
-        public void TriggerSync(string operation, ExecutionStage stage,
-                object entity, Entity preImage, Entity postImage, PluginContext pluginContext, Core core)
+        public void Trigger(string operation,
+                                ExecutionStage stage,
+                                object entity, 
+                                Entity preImage, 
+                                Entity postImage, 
+                                PluginContext pluginContext, 
+                                Core core,
+                                bool syncOnly)
         {
 
 
             if (!disableRegisteredPlugins)
             {
-                var toExecute = new List<PluginTrigger>();
+                List<PluginTrigger> toExecuteRegistered = GetPluginsToExecute(registeredPlugins, operation, stage, entity, preImage, postImage, pluginContext, core, syncOnly);
 
-                if (registeredPlugins.ContainsKey(operation))
-                {
-                    var opPlugins = registeredPlugins[operation];
-                    if (opPlugins.ContainsKey(stage))
-                    { 
-                        var opStagePlugins = opPlugins[stage];
-                        var syncPlugins = opStagePlugins.Where(x => x.GetExecutionMode() == ExecutionMode.Synchronous);
-
-                        foreach (var plugin in syncPlugins)
-                        {
-                            if (plugin.ShouldExecute(entity, preImage, postImage, pluginContext, core))
-                            { 
-                                toExecute.Add(plugin);
-                            }
-                        }
-
-                    }
-                }
-
-                foreach (var ex in toExecute.OrderBy(x=>x.GetExecutionOrder()))
+                foreach (var ex in toExecuteRegistered.OrderBy(x => x.GetExecutionOrder()))
                 {
                     ex.ExecutePlugin(entity, preImage, postImage, pluginContext, core);
                 }
-                
-            
             }
 
-            //if (!disableRegisteredPlugins && registeredPlugins.ContainsKey(operation) && registeredPlugins[operation].ContainsKey(stage))
-            //    registeredPlugins[operation][stage].Where(p => p.GetExecutionMode() == ExecutionMode.Synchronous)
-            //        .OrderBy(p => p.GetExecutionOrder()).ToList().ForEach(p => p.ExecuteIfMatch(entity, preImage, postImage, pluginContext, core));
-            
-            
-            if (temporaryPlugins.ContainsKey(operation) && temporaryPlugins[operation].ContainsKey(stage))
-                temporaryPlugins[operation][stage].Where(p => p.GetExecutionMode() == ExecutionMode.Synchronous)
-                    .OrderBy(p => p.GetExecutionOrder()).ToList().ForEach(p => p.ExecuteIfMatch(entity, preImage, postImage, pluginContext, core));
+            List<PluginTrigger> toExecuteTemporary = GetPluginsToExecute(temporaryPlugins, operation, stage, entity, preImage, postImage, pluginContext, core, syncOnly);
+
+            foreach (var ex in toExecuteTemporary.OrderBy(x => x.GetExecutionOrder()))
+            {
+                ex.ExecutePlugin(entity, preImage, postImage, pluginContext, core);
+            }
+
+
+        }
+
+        private List<PluginTrigger> GetPluginsToExecute(Dictionary<string, Dictionary<ExecutionStage, List<PluginTrigger>>> candidatePlugins, string operation, ExecutionStage stage, object entity, Entity preImage, Entity postImage, PluginContext pluginContext, Core core, bool syncOnly)
+        {
+            var toExecute = new List<PluginTrigger>();
+
+            if (!candidatePlugins.ContainsKey(operation)) return toExecute;
+            if (!candidatePlugins[operation].ContainsKey(stage)) return toExecute;
+
+
+            var opStagePlugins = candidatePlugins[operation][stage];    
+
+            if (syncOnly)
+            {
+                opStagePlugins = opStagePlugins.Where(x => x.GetExecutionMode() == ExecutionMode.Synchronous).ToList();
+            }
+
+            foreach (var plugin in opStagePlugins)
+            {
+                if (plugin.ShouldExecute(entity, preImage, postImage, pluginContext, core))
+                {
+                    toExecute.Add(plugin);
+                }
+            }
+
+            return toExecute;
         }
 
         public void StageAsync(string operation, ExecutionStage stage,
@@ -399,10 +401,12 @@ namespace DG.Tools.XrmMockup
         public void TriggerSystem(string operation, ExecutionStage stage,
                 object entity, Entity preImage, Entity postImage, PluginContext pluginContext, Core core)
         {
-            if (!this.registeredSystemPlugins.ContainsKey(operation)) return;
-            if (!this.registeredSystemPlugins[operation].ContainsKey(stage)) return;
+            List<PluginTrigger> toExecuteSystem = GetPluginsToExecute(registeredSystemPlugins, operation, stage, entity, preImage, postImage, pluginContext, core, syncOnly: false);
 
-            registeredSystemPlugins[operation][stage].ForEach(p => p.ExecuteIfMatch(entity, preImage, postImage, pluginContext, core));
+            foreach (var ex in toExecuteSystem.OrderBy(x => x.GetExecutionOrder()))
+            {
+                ex.ExecutePlugin(entity, preImage, postImage, pluginContext, core);
+            }
         }
 
         internal class PluginTrigger : IComparable<PluginTrigger>

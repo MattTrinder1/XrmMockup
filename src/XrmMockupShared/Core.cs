@@ -630,7 +630,7 @@ namespace DG.Tools.XrmMockup
                 // System Pre-validation
                 pluginManager.TriggerSystem(eventOp, ExecutionStage.PreValidation, entityInfo.obj, preImage, postImage, pluginContext, this);
                 // Pre-validation
-                pluginManager.Trigger(eventOp, ExecutionStage.PreValidation, entityInfo.obj, preImage, postImage, pluginContext, this);
+                pluginManager.Trigger(eventOp, ExecutionStage.PreValidation, entityInfo.obj, preImage, postImage, pluginContext, this,syncOnly: false);
             }
 
             //perform security checks for the request
@@ -643,7 +643,7 @@ namespace DG.Tools.XrmMockup
                 pluginContext.SharedVariables.Clear();
 
                 // Pre-operation
-                pluginManager.Trigger(eventOp, ExecutionStage.PreOperation, entityInfo.obj, preImage, postImage, pluginContext, this);
+                pluginManager.Trigger(eventOp, ExecutionStage.PreOperation, entityInfo.obj, preImage, postImage, pluginContext, this,syncOnly: false);
                 workflowManager.TriggerSync(eventOp, ExecutionStage.PreOperation, entityInfo.obj, preImage, postImage, pluginContext, this);
 
                 // System Pre-operation
@@ -671,7 +671,7 @@ namespace DG.Tools.XrmMockup
                     CopySystemAttributes(postImage, entityInfo.obj as Entity);
 
                     pluginManager.TriggerSystem(eventOp, ExecutionStage.PostOperation, entityInfo.obj, preImage, postImage, pluginContext, this);
-                    pluginManager.TriggerSync(eventOp, ExecutionStage.PostOperation, entityInfo.obj, preImage, postImage, pluginContext, this);
+                    pluginManager.Trigger(eventOp, ExecutionStage.PostOperation, entityInfo.obj, preImage, postImage, pluginContext, this, syncOnly: true);
                     pluginManager.StageAsync(eventOp, ExecutionStage.PostOperation, entityInfo.obj, preImage, postImage, pluginContext, this);
 
                     workflowManager.TriggerSync(eventOp, ExecutionStage.PostOperation, entityInfo.obj, preImage, postImage, pluginContext, this);
