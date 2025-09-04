@@ -2,7 +2,7 @@
   "profiles": {
     "MetadataGenerator365": {
       "commandName": "Project",
-      "commandLineArgs": "Barnardos.Gateway"
+      "commandLineArgs": "Checkmate"
     }
   }
 }
