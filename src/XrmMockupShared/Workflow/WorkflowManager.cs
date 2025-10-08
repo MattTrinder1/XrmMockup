@@ -295,7 +295,12 @@ namespace DG.Tools.XrmMockup {
 
             var guid = entity?.Id ?? entityRef.Id;
             var logicalName = entity?.LogicalName ?? entityRef.LogicalName;
-            
+
+            if (workflow.GetAttributeValue<OptionSetValue>("statecode").Value == 0)
+            {
+                return false;
+            }
+
             if (workflow.GetAttributeValue<string>("primaryentity") != "" && workflow.GetAttributeValue<string>("primaryentity") != logicalName) return false;
 
             checkInfiniteRecursion(pluginContext);
