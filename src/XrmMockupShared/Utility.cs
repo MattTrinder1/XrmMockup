@@ -1,30 +1,30 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using Microsoft.Xrm.Sdk;
-using Microsoft.Xrm.Sdk.Query;
-using Microsoft.Xrm.Sdk.Messages;
-using System.Reflection;
-using Microsoft.Xrm.Sdk.Client;
-using System.Globalization;
-using System.Collections;
-using System.Text.RegularExpressions;
-using System.Collections.ObjectModel;
-using System.Runtime.Serialization;
-using Microsoft.Xrm.Sdk.Metadata;
-using System.ServiceModel;
-using Microsoft.Crm.Sdk.Messages;
-using System.IO;
-using DG.Tools.XrmMockup.Database;
-using System.Xml.Linq;
-using System.Collections.Concurrent;
+﻿using DG.Tools.XrmMockup.Database;
 using DG.Tools.XrmMockup.Serialization;
+using Microsoft.Crm.Sdk.Messages;
+using Microsoft.Xrm.Sdk;
+using Microsoft.Xrm.Sdk.Client;
+using Microsoft.Xrm.Sdk.Messages;
+using Microsoft.Xrm.Sdk.Metadata;
+using Microsoft.Xrm.Sdk.Query;
+using System;
+using System.Collections;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Globalization;
+using System.IO;
+using System.IO.Compression;
+using System.Linq;
+using System.Reflection;
+using System.Runtime.Serialization;
+using System.Security.Principal;
+using System.ServiceModel;
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
-using System.IO.Compression;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace DG.Tools.XrmMockup
 {
@@ -625,6 +625,9 @@ namespace DG.Tools.XrmMockup
             else if (obj is OptionSetValue optionSetValue)
                 return optionSetValue.Value;
 
+            else if (obj is OptionSetValueCollection optionSetValueCollection)
+                return optionSetValueCollection.Select(x =>x.Value).ToArray();
+
             else if (obj != null && obj.GetType().IsEnum)
                 return (int)obj;
 
@@ -666,8 +669,12 @@ namespace DG.Tools.XrmMockup
 
                 case ConditionOperator.Equal:
                     if (attr == null) return false;
-                    
-                    if (attr.GetType() == typeof(string))
+
+                    if (attr.GetType().IsArray)
+                    {
+                        return (attr as int[]).Contains((int)values.First());
+                    }
+                    else if (attr.GetType() == typeof(string))
                     {
                         return (attr as string).Equals((string)ConvertTo(values.First(), attr?.GetType()), StringComparison.OrdinalIgnoreCase);
                     }
@@ -675,93 +682,103 @@ namespace DG.Tools.XrmMockup
                     {
                         return Equals(ConvertTo(values.First(), attr?.GetType()), attr);
                     }
+                case ConditionOperator.ContainValues:
+
+                    if (attr.GetType().IsArray)
+                    {
+                        return (attr as int[]).Contains((int)values.First());
+                    }
+                    else
+                    {
+                        return false;
+                    }
 
                 case ConditionOperator.NotEqual:
-                    return !Matches(attr,ConditionOperator.Equal, values);
+                            return !Matches(attr, ConditionOperator.Equal, values);
 
-                case ConditionOperator.GreaterThan:
-                case ConditionOperator.GreaterEqual:
-                case ConditionOperator.LessEqual:
-                case ConditionOperator.LessThan:
-                    return Compare((IComparable)attr, op, (IComparable)values.First());
+                        case ConditionOperator.GreaterThan:
+                        case ConditionOperator.GreaterEqual:
+                        case ConditionOperator.LessEqual:
+                        case ConditionOperator.LessThan:
+                            return Compare((IComparable)attr, op, (IComparable)values.First());
 
-                case ConditionOperator.NotLike:
-                    return !Matches(attr, ConditionOperator.Like, values);
+                        case ConditionOperator.NotLike:
+                            return !Matches(attr, ConditionOperator.Like, values);
 
-                case ConditionOperator.Like:
-                    if (attr == null)
-                        return false;
-                    var sAttr = (string)attr;
-                    var pattern = (string)values.First();
-                    if (pattern.First() == '%' && (pattern.Last() == '%'))
-                    {
-                        return sAttr.Contains(pattern.Substring(1, pattern.Length - 2));
-                    }
-                    else if (pattern.First() == '%')
-                    {
-                        return sAttr.EndsWith(pattern.Substring(1));
-                    }
-                    else if (pattern.Last() == '%')
-                    {
-                        return sAttr.StartsWith(pattern.Substring(0, pattern.Length - 1));
-                    }
-                    else
-                    {
-                        throw new NotImplementedException($"The like matching for '{pattern}' has not been implemented yet");
-                    }
+                        case ConditionOperator.Like:
+                            if (attr == null)
+                                return false;
+                            var sAttr = (string)attr;
+                            var pattern = (string)values.First();
+                            if (pattern.First() == '%' && (pattern.Last() == '%'))
+                            {
+                                return sAttr.Contains(pattern.Substring(1, pattern.Length - 2));
+                            }
+                            else if (pattern.First() == '%')
+                            {
+                                return sAttr.EndsWith(pattern.Substring(1));
+                            }
+                            else if (pattern.Last() == '%')
+                            {
+                                return sAttr.StartsWith(pattern.Substring(0, pattern.Length - 1));
+                            }
+                            else
+                            {
+                                throw new NotImplementedException($"The like matching for '{pattern}' has not been implemented yet");
+                            }
 
-                case ConditionOperator.NextXYears:
-                    var now = DateTime.UtcNow;
-                    DateTime date;
-                    if (attr is DateTime)
-                    {
-                        date = (DateTime)attr;
-                    }
-                    else
-                    {
-                        date = DateTime.Parse((string)attr);
-                    }
-                    var x = int.Parse((string)values.First());
-                    return now.Date <= date.Date && date.Date <= now.AddYears(x).Date;
-                
-                case ConditionOperator.In:
-                    return values.Contains(attr);
-                
-                case ConditionOperator.NotIn:
-                    return !values.Contains(attr);
-                
-                case ConditionOperator.BeginsWith:
-                    if (attr == null) return false;
+                        case ConditionOperator.NextXYears:
+                            var now = DateTime.UtcNow;
+                            DateTime date;
+                            if (attr is DateTime)
+                            {
+                                date = (DateTime)attr;
+                            }
+                            else
+                            {
+                                date = DateTime.Parse((string)attr);
+                            }
+                            var x = int.Parse((string)values.First());
+                            return now.Date <= date.Date && date.Date <= now.AddYears(x).Date;
 
-                    if (attr.GetType() == typeof(string))
-                    {
-                        return (attr as string).StartsWith((string)ConvertTo(values.First(), attr?.GetType()), StringComparison.OrdinalIgnoreCase);
-                    }
-                    else
-                    {
-                        throw new NotImplementedException($"The ConditionOperator '{op}' is not valid for anything other than string yet.");
-                    }
-                
-                case ConditionOperator.DoesNotBeginWith:
-                    return !Matches(attr, ConditionOperator.BeginsWith, values);
-                
-                case ConditionOperator.EndsWith:
-                    if (attr == null) return false;
+                        case ConditionOperator.In:
+                            return values.Contains(attr);
 
-                    if (attr.GetType() == typeof(string))
-                    {
-                        return (attr as string).EndsWith((string)ConvertTo(values.First(), attr?.GetType()), StringComparison.OrdinalIgnoreCase);
-                    }
-                    else
-                    {
-                        throw new NotImplementedException($"The ConditionOperator '{op}' is not valid for anything other than string yet.");
-                    }
-                
-                case ConditionOperator.DoesNotEndWith:
-                    return !Matches(attr, ConditionOperator.EndsWith, values);
-                default:
-                    throw new NotImplementedException($"The ConditionOperator '{op}' has not been implemented yet.");
-            }
+                        case ConditionOperator.NotIn:
+                            return !values.Contains(attr);
+
+                        case ConditionOperator.BeginsWith:
+                            if (attr == null) return false;
+
+                            if (attr.GetType() == typeof(string))
+                            {
+                                return (attr as string).StartsWith((string)ConvertTo(values.First(), attr?.GetType()), StringComparison.OrdinalIgnoreCase);
+                            }
+                            else
+                            {
+                                throw new NotImplementedException($"The ConditionOperator '{op}' is not valid for anything other than string yet.");
+                            }
+
+                        case ConditionOperator.DoesNotBeginWith:
+                            return !Matches(attr, ConditionOperator.BeginsWith, values);
+
+                        case ConditionOperator.EndsWith:
+                            if (attr == null) return false;
+
+                            if (attr.GetType() == typeof(string))
+                            {
+                                return (attr as string).EndsWith((string)ConvertTo(values.First(), attr?.GetType()), StringComparison.OrdinalIgnoreCase);
+                            }
+                            else
+                            {
+                                throw new NotImplementedException($"The ConditionOperator '{op}' is not valid for anything other than string yet.");
+                            }
+
+                        case ConditionOperator.DoesNotEndWith:
+                            return !Matches(attr, ConditionOperator.EndsWith, values);
+                        default:
+                            throw new NotImplementedException($"The ConditionOperator '{op}' has not been implemented yet.");
+                        }
 
         }
 
@@ -1213,7 +1230,8 @@ namespace DG.Tools.XrmMockup
 
             var formattedValues = new ConcurrentBag<KeyValuePair<string, string>>();
 
-            Parallel.ForEach(entity.Attributes.Where(x=>x.Value != null), a =>
+            //Parallel.ForEach(entity.Attributes.Where(x=>x.Value != null), a =>
+            foreach (var a in entity.Attributes.Where(x => x.Value != null))
              {
                  var metadataAtt = validMetadata.Where(m => m.LogicalName == a.Key).FirstOrDefault();
                  var formattedValuePair = new KeyValuePair<string, string>(a.Key, Utility.GetFormattedValueLabel(db, metadataAtt, a.Value, entity));
@@ -1221,7 +1239,8 @@ namespace DG.Tools.XrmMockup
                  {
                      formattedValues.Add(formattedValuePair);
                  }
-             });
+             }
+             //);
 
             if (formattedValues.Count > 0)
             {
