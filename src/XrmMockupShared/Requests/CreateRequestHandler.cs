@@ -224,7 +224,7 @@ namespace DG.Tools.XrmMockup
                     {
                         //get the length of the string to format
                         var index = stringToFormat.IndexOf("{SEQNUM:");
-                        var index2 = stringToFormat.IndexOf("}");
+                        var index2 = stringToFormat.IndexOf("}",index);
                         var length = stringToFormat.Substring(index + 8, index2 - index - 8);
                         var nextSeqNum = core.GetDbTable(clonedEntity.LogicalName).Select(x => x[autoNumAttr.LogicalName] as string).ToList();
 
@@ -232,11 +232,11 @@ namespace DG.Tools.XrmMockup
 
                         if (nextSeqNum.Any())
                         {
-                            var desc = nextSeqNum.OrderByDescending(x => x);
-                            var largest = desc.First();
+                          //  var desc = nextSeqNum.OrderByDescending(x => x);
+                          //  var largest = desc.First();
                             //parse the number out of this
-                            nextNum = Convert.ToInt32(largest.Substring(4, Convert.ToInt32(length)));
-                            nextNum++;
+                            //nextNum = Convert.ToInt32(largest.Substring(4, Convert.ToInt32(length)));
+                            nextNum+= nextSeqNum.Count ;
                         }
 
 
@@ -246,7 +246,7 @@ namespace DG.Tools.XrmMockup
                     if (stringToFormat.Contains("RANDSTRING"))
                     {
                         var index = stringToFormat.IndexOf("{RANDSTRING:");
-                        var index2 = stringToFormat.IndexOf("}");
+                        var index2 = stringToFormat.IndexOf("}",index);
                         var length = stringToFormat.Substring(index + 12, index2 - index - 12);
                         var randString = GenerateRandString(Convert.ToInt32(length));
 
