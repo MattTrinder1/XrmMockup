@@ -1,15 +1,17 @@
-﻿using System;
+﻿using Microsoft.Xrm.Sdk;
+using Microsoft.Xrm.Sdk.Metadata;
+using Microsoft.Xrm.Sdk.Query;
+using Microsoft.Xrm.Tooling.Connector;
+using System;
+using System.Activities.Statements;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.ExceptionServices;
+using System.ServiceModel;
 using System.Text;
 using System.Threading.Tasks;
-
-using Microsoft.Xrm.Sdk;
-using Microsoft.Xrm.Sdk.Query;
-using System.ServiceModel;
-using Microsoft.Xrm.Sdk.Metadata;
-using System.Runtime.ExceptionServices;
+using System.Web.UI.WebControls;
 using XrmMockupShared.Plugin;
 
 namespace DG.Tools.XrmMockup
@@ -22,6 +24,7 @@ namespace DG.Tools.XrmMockup
         }
 
         public string ClassName { get; set; }
+        public string Configuration { get; set; }
         public int ExecutionStage { get; set; }
         public string EventOperation { get; set; }
         public string LogicalName { get; set; }
@@ -105,9 +108,11 @@ namespace DG.Tools.XrmMockup
                 if (pluginType == null) continue;
                 Assembly proxyTypeAssembly = pluginType.Assembly;
 
-                foreach (var type in proxyTypeAssembly.GetLoadableTypes())
+                var loadableTypes = proxyTypeAssembly.GetLoadableTypes().Where(x=>x.GetInterface("IPlugin") == typeof(IPlugin)).ToList();
+
+                foreach (var type in loadableTypes)
                 {
-                    if (!type.IsAbstract && type.GetInterface("IPlugin") == typeof(IPlugin) && type.BaseType == typeof(Object))
+                    if (!type.IsAbstract && type.BaseType == typeof(Object))
                     {
                         RegisterPlugin(type, metadata, plugins, register);
                     }
@@ -119,21 +124,21 @@ namespace DG.Tools.XrmMockup
 
         private void RegisterPlugin(Type basePluginType, Dictionary<string, EntityMetadata> metadata, List<MetaPlugin> plugins, Dictionary<string, Dictionary<ExecutionStage, List<PluginTrigger>>> register)
         {
-            object plugin = null;
-            try
-            {
-                plugin = Activator.CreateInstance(basePluginType);
-            }
-            catch (Exception ex) when (ex.Source == "mscorlib" || ex.Source == "System.Private.CoreLib")
-            {
-            }
+            //object plugin = null;
+            //try
+            //{
+            //    plugin = Activator.CreateInstance(basePluginType);
+            //}
+            //catch (Exception ex) when (ex.Source == "mscorlib" || ex.Source == "System.Private.CoreLib")
+            //{
+            //}
 
-            if (plugin == null)
-            {
-                return;
-            }
+            //if (plugin == null)
+            //{
+            //    return;
+            //}
 
-            Action<MockupServiceProviderAndFactory> pluginExecute = null;
+            //Action<MockupServiceProviderAndFactory> pluginExecute = null;
             var pluginStepConfigs = new List<InternalPluginStepConfig>();
 
             //if (basePluginType.GetMethod("PluginProcessingStepConfigs") != null)
@@ -174,52 +179,66 @@ namespace DG.Tools.XrmMockup
 
                 if (metaSteps == null || metaSteps.Count == 0)
                 {
-                    throw new MockupException($"Unknown plugin '{basePluginType.FullName}', please use DAXIF registration or make sure the plugin is uploaded to CRM.");
+                   // throw new MockupException($"Unknown plugin '{basePluginType.FullName}', please use DAXIF registration or make sure the plugin is uploaded to CRM.");
                 }
 
-                foreach (var metaStep in metaSteps)
+            foreach (var metaStep in metaSteps)
+            {
+                var config = new InternalPluginStepConfig()
                 {
-                    var config = new InternalPluginStepConfig()
-                    {
-                        ClassName = metaStep.AssemblyName,
-                        ExecutionStage = metaStep.Stage,
-                        EventOperation = metaStep.MessageName,
-                        LogicalName = metaStep.PrimaryEntity,
-                        Deployment = 0,
-                        ExecutionMode = metaStep.Mode,
-                        Name = metaStep.Name,
-                        ExecutionOrder = metaStep.Rank,
-                        FilteredAttributes = metaStep.FilteredAttributes,
-                        ImpersonatingUserId = metaStep.ImpersonatingUserId?.ToString(),
-                        IsolationMode = metaStep.IsolationMode
-                    };
+                    ClassName = metaStep.AssemblyName,
+                    Configuration = metaStep.Configuration,
+                    ExecutionStage = metaStep.Stage,
+                    EventOperation = metaStep.MessageName,
+                    LogicalName = metaStep.PrimaryEntity,
+                    Deployment = 0,
+                    ExecutionMode = metaStep.Mode,
+                    Name = metaStep.Name,
+                    ExecutionOrder = metaStep.Rank,
+                    FilteredAttributes = metaStep.FilteredAttributes,
+                    ImpersonatingUserId = metaStep.ImpersonatingUserId?.ToString(),
+                    IsolationMode = metaStep.IsolationMode
+                };
 
-                    foreach (var image in metaStep.Images)
+                foreach (var image in metaStep.Images)
+                {
+                    config.Images.Add(new InternalPluginStepImage()
                     {
-                        config.Images.Add(new InternalPluginStepImage()
-                        {
-                            Name = image.Name,
-                            EntityAlias= image.EntityAlias,
-                            ImageType = image.ImageType,
-                            Attributes = image.Attributes
-                        });
-                    }
-
-                    pluginStepConfigs.Add(config);
-                    pluginExecute = (provider) =>
-                    {
-                        basePluginType
-                        .GetMethod("Execute")
-                        .Invoke(plugin, new object[] { provider });
-                    };
+                        Name = image.Name,
+                        EntityAlias = image.EntityAlias,
+                        ImageType = image.ImageType,
+                        Attributes = image.Attributes
+                    });
                 }
+
+                //if (!string.IsNullOrEmpty(config.Configuration))
+                //{
+                //    //replace the activated instance with one with the unsecure config passed into it.
+
+                //    var args = new List<string>();
+                //    args.Add(config.Configuration);
+                //    args.Add("");
+
+                //    plugin = plugin = Activator.CreateInstance(basePluginType, args.ToArray());
+
+                //}
+
+                pluginStepConfigs.Add(config);
+                
+                //pluginExecute = (provider) =>
+                //{
+                //    basePluginType
+                //    .GetMethod("Execute")
+                //    .Invoke(plugin, new object[] { provider });
+                //};
+            }
            // }
 
             // Add discovered plugin triggers
             foreach (var stepConfig in pluginStepConfigs)
             {
                 var stage = (ExecutionStage)stepConfig.ExecutionStage;
-                var trigger = new PluginTrigger(stepConfig.EventOperation, stage, pluginExecute, stepConfig, metadata);
+                var trigger = new PluginTrigger(stepConfig.EventOperation, stage, stepConfig, metadata,basePluginType);
                 AddTrigger(stepConfig.EventOperation.ToLower(), stage, trigger, register);
             }
         }
@@ -421,9 +440,13 @@ namespace DG.Tools.XrmMockup
             int order = 0;
             Dictionary<string, EntityMetadata> metadata;
             string impersonatingUserId;
+            Type pluginType;
+            string configuration;
 
             HashSet<string> attributes;
             List<InternalPluginStepImage> images;
+
+            object activatedInstance = null;
 
             public PluginTrigger(string operation, ExecutionStage stage,
                     Action<MockupServiceProviderAndFactory> pluginExecute, InternalPluginStepConfig stepConfig, Dictionary<string, EntityMetadata> metadata)
@@ -438,6 +461,25 @@ namespace DG.Tools.XrmMockup
                 this.images = stepConfig.Images;
                 this.metadata = metadata;
                 this.impersonatingUserId = stepConfig.ImpersonatingUserId;
+                this.configuration = stepConfig.Configuration;
+
+                var attrs = stepConfig.FilteredAttributes ?? "";
+                this.attributes = String.IsNullOrWhiteSpace(attrs) ? new HashSet<string>() : new HashSet<string>(attrs.Split(','));
+            }
+
+            public PluginTrigger(string operation, ExecutionStage stage,InternalPluginStepConfig stepConfig, Dictionary<string, EntityMetadata> metadata, Type pluginType)
+            {
+                this.entityName = stepConfig.LogicalName;
+                this.operation = operation.ToLower();
+                this.stage = stage;
+                this.isolationMode = stepConfig.IsolationMode;
+                this.mode = (ExecutionMode)stepConfig.ExecutionMode;
+                this.order = stepConfig.ExecutionOrder;
+                this.images = stepConfig.Images;
+                this.metadata = metadata;
+                this.impersonatingUserId = stepConfig.ImpersonatingUserId;
+                this.pluginType = pluginType;
+                this.configuration = stepConfig.Configuration;
 
                 var attrs = stepConfig.FilteredAttributes ?? "";
                 this.attributes = String.IsNullOrWhiteSpace(attrs) ? new HashSet<string>() : new HashSet<string>(attrs.Split(','));
@@ -518,8 +560,48 @@ namespace DG.Tools.XrmMockup
                 MockupServiceProviderAndFactory provider = new MockupServiceProviderAndFactory(core, thisPluginContext, core.TracingServiceFactory);
                 try
                 {
-                    pluginExecute(provider);
-                }
+                    ///////////////////////////////////////////////////////
+                    ///
+
+                    if (this.pluginType == null)
+                    {
+                        //system plugins
+                        pluginExecute(provider);
+                    }
+
+                    else
+                    {
+                        if (activatedInstance == null)
+                        {
+                            if (!string.IsNullOrEmpty(configuration))
+                            {
+                                var stringargs = new List<string>();
+                                stringargs.Add(configuration);
+                                stringargs.Add("");
+
+                                activatedInstance = Activator.CreateInstance(pluginType, stringargs.ToArray());
+
+                            }
+                            else
+                            {
+                                activatedInstance = Activator.CreateInstance(pluginType, null);
+                            }
+                        }
+
+                        pluginType.GetMethod("Execute").Invoke(activatedInstance, new object[] { provider });
+                    }
+                //}
+
+                
+                //pluginExecute = (provider) =>
+                //{
+                //    basePluginType
+                //    .GetMethod("Execute")
+                //    .Invoke(plugin, new object[] { provider });
+                //};
+                    /////////////////////////////////
+                //
+            }
                 catch (TargetInvocationException e)
                 {
                     ExceptionDispatchInfo.Capture(e.InnerException).Throw();

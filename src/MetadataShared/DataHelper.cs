@@ -152,9 +152,11 @@ namespace DG.Tools.XrmMockup.Metadata
 
             foreach (var pluginStep in pluginSteps.Entities)
             {
+
                 var metaPlugin = new MetaPlugin()
                 {
                     Name = pluginStep.GetAttributeValue<string>("name"),
+                    Configuration = pluginStep.GetAttributeValue<string>("configuration"),
                     Rank = pluginStep.GetAttributeValue<int>("rank"),
                     FilteredAttributes = pluginStep.GetAttributeValue<string>("filteringattributes"),
                     Mode = pluginStep.GetAttributeValue<OptionSetValue>("mode").Value,
@@ -431,6 +433,30 @@ namespace DG.Tools.XrmMockup.Metadata
             var category = new FilterExpression(LogicalOperator.Or);
             category.AddCondition("category", ConditionOperator.Equal, 0);
             category.AddCondition("category", ConditionOperator.Equal, 3);
+
+            query.Criteria.AddFilter(category);
+
+            return service.RetrieveMultiple(query).Entities
+                .Select(e => e.ToEntity<Entity>());
+        }
+
+        internal IEnumerable<Entity> GetBusinessProcessFlows()
+        {
+            var activeSolutionId = GetActiveSolution();
+
+            var query = new QueryExpression("workflow")
+            {
+                ColumnSet = new ColumnSet(true),
+                Criteria = new FilterExpression()
+            };
+
+            if (!activeSolutionId.HasValue) return new List<Entity>();
+
+            query.Criteria.AddCondition("solutionid", ConditionOperator.Equal, activeSolutionId);
+            query.Criteria.AddCondition("statecode", ConditionOperator.Equal, 1);
+
+            var category = new FilterExpression(LogicalOperator.Or);
+            category.AddCondition("category", ConditionOperator.Equal, 4);
 
             query.Criteria.AddFilter(category);
 
