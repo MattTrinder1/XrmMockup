@@ -144,7 +144,7 @@ namespace DG.Tools.XrmMockup {
             // Construct the Local plug-in context.
             LocalPluginContext localcontext = new LocalPluginContext(serviceProvider);
 
-            localcontext.Trace(string.Format(CultureInfo.InvariantCulture, "Entered {0}.Execute()", this.ChildClassName));
+           // localcontext.Trace(string.Format(CultureInfo.InvariantCulture, "Entered {0}.Execute()", this.ChildClassName));
 
             try {
                 // Iterate over all of the expected registered events to ensure that the plugin
@@ -183,7 +183,7 @@ namespace DG.Tools.XrmMockup {
                 // Handle the exception.
                 throw;
             } finally {
-                localcontext.Trace(string.Format(CultureInfo.InvariantCulture, "Exiting {0}.Execute()", this.ChildClassName));
+             //   localcontext.Trace(string.Format(CultureInfo.InvariantCulture, "Exiting {0}.Execute()", this.ChildClassName));
             }
         }
 
