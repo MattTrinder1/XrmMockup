@@ -34,7 +34,10 @@ namespace DG.Tools.XrmMockup {
                 throw new FaultException($"Calling user with id '{userRef.Id}' does not have permission to read entity '{row.Table.TableName}'");
             }
 
+            core.ExecuteRollupFields(row);
+
             core.ExecuteCalculatedFields(row);
+            
             row = db.GetDbRow(request.Target);
             var entity = core.GetStronglyTypedEntity(row.ToEntity(), row.Metadata, request.ColumnSet);
 
