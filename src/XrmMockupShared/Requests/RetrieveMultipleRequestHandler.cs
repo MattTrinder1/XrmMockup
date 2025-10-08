@@ -58,7 +58,8 @@ namespace DG.Tools.XrmMockup {
 
             var collection = new ConcurrentBag<KeyValuePair<DbRow, Entity>>();
 
-            Parallel.ForEach(rows, row =>
+          //  Parallel.ForEach(rows, row =>
+          foreach(var row in rows)
             {
                 var entity = row.ToEntity();
 
@@ -89,7 +90,8 @@ namespace DG.Tools.XrmMockup {
                         collection.Add(new KeyValuePair<DbRow, Entity>(row, toAdd));
                     }
                 }
-            });
+            }
+        //);
             
             var orders = queryExpr.Orders;
             var orderedCollection = new EntityCollection();
