@@ -49,6 +49,7 @@ namespace DG.Tools.XrmMockup
         public string FilteredAttributes;
         public int Mode;
         public string Name;
+        public string Configuration;
         public int Rank;
         public int Stage;
         public string MessageName;
