@@ -16,6 +16,7 @@ using System.Text.Json;
 using DG.Tools.XrmMockup.Serialization;
 
 using Microsoft.Xrm.Sdk.Organization;
+using System.Xml;
 
 [assembly: InternalsVisibleTo("SharedTests")]
 
@@ -225,7 +226,10 @@ namespace DG.Tools.XrmMockup
             new WhoAmIRequestHandler(this, db, metadata, security),
             new RetrievePrincipalAccessRequestHandler(this, db, metadata, security),
             new RetrieveMetadataChangesRequestHandler(this, db, metadata, security),
-            new PublishXmlRequestHandler(this, db, metadata, security)
+            new PublishXmlRequestHandler(this, db, metadata, security),
+            new QualifyLeadRequestHandler(this, db, metadata, security),
+            new RetrieveProcessInstancesRequestHandler(this, db, metadata, security),
+            new SetProcessRequestHandler(this, db, metadata, security)
         };
 
         internal void EnableProxyTypes(Assembly assembly)
@@ -1128,6 +1132,11 @@ namespace DG.Tools.XrmMockup
 
         internal EntityMetadata GetEntityMetadata(string entityLogicalName)
         {
+            if (!metadata.EntityMetadata.ContainsKey(entityLogicalName))
+            {
+                throw new KeyNotFoundException($"could not find {entityLogicalName}");
+            }
+
             return metadata.EntityMetadata[entityLogicalName];
         }
 
@@ -1154,9 +1163,107 @@ namespace DG.Tools.XrmMockup
                     return;
                 }
                 var tree = WorkflowConstructor.ParseCalculated(definition);
+
+                
+
                 var factory = this.ServiceFactory;
                 tree.Execute(row.ToEntity().CloneEntity(row.Metadata, new ColumnSet(true)), this.TimeOffset, this.GetWorkflowService(),
                     factory, factory.GetService<ITracingService>());
+            }
+        }
+
+        internal void ExecuteRollupFields(DbRow row)
+        {
+            var attributes = row.Metadata.Attributes.Where(
+                m => m.SourceType == 2 && !(m is MoneyAttributeMetadata && m.LogicalName.EndsWith("_base")));
+
+            foreach (var attr in attributes)
+            {
+                string definition = (attr as BooleanAttributeMetadata)?.FormulaDefinition;
+                if (attr is BooleanAttributeMetadata) definition = (attr as BooleanAttributeMetadata).FormulaDefinition;
+                else if (attr is DateTimeAttributeMetadata) definition = (attr as DateTimeAttributeMetadata).FormulaDefinition;
+                else if (attr is DecimalAttributeMetadata) definition = (attr as DecimalAttributeMetadata).FormulaDefinition;
+                else if (attr is IntegerAttributeMetadata) definition = (attr as IntegerAttributeMetadata).FormulaDefinition;
+                else if (attr is MoneyAttributeMetadata) definition = (attr as MoneyAttributeMetadata).FormulaDefinition;
+                else if (attr is PicklistAttributeMetadata) definition = (attr as PicklistAttributeMetadata).FormulaDefinition;
+                else if (attr is StringAttributeMetadata) definition = (attr as StringAttributeMetadata).FormulaDefinition;
+
+                if (definition == null)
+                {
+                    var trace = this.ServiceFactory.GetService<ITracingService>();
+                    trace.Trace($"Calculated field on {attr.EntityLogicalName} field {attr.LogicalName} is empty");
+                    return;
+                }
+
+                var tree = WorkflowConstructor.ParseCalculated(definition);
+
+                var relationship = (tree.StartActivity as ActivityList).Activities.Where(x => x is SetAttributeValue).Cast<SetAttributeValue>().First().VariableId;
+                relationship = relationship.Replace("CreatedEntities(\"", "");
+                relationship = relationship.Replace("\")", "");
+                relationship = relationship.Replace("relatedlinked_", "");
+                var relParts = relationship.Split(new char[] { '#' });
+
+                var relationshipMetadata = row.Metadata.OneToManyRelationships.Single(x => x.SchemaName == relParts[0]);
+
+                var q = new QueryExpression(relationshipMetadata.ReferencingEntity);
+                q.ColumnSet = new ColumnSet(true);
+                q.Criteria.AddCondition(relationshipMetadata.ReferencingAttribute, ConditionOperator.Equal, row.GetColumn( relationshipMetadata.ReferencedAttribute));
+
+                var req = new RetrieveMultipleRequest();
+                req.Query = q;
+
+                var resp =(RetrieveMultipleResponse) Execute(req, AdminUserRef);
+
+                if (resp.EntityCollection.Entities.Count == 0)
+                {
+                    continue;
+                }
+
+                var aggregateCol = (tree.StartActivity as ActivityList).Activities.Where(x => x is GetEntityProperty).Cast<GetEntityProperty>().First().Attribute;
+                var aggregateType = (tree.StartActivity as ActivityList).Activities.Where(x => x is Aggregate).Cast<Aggregate>().First().Method;
+
+                if ((tree.StartActivity as ActivityList).Activities.Where(x => x is GetEntityProperty).Count() > 1)
+                { 
+                    aggregateCol = (tree.StartActivity as ActivityList).Activities.Where(x => x is GetEntityProperty).Cast<GetEntityProperty>().Last().Attribute;
+                }
+
+                decimal sumTotal;
+                int countTotal;
+
+                var updateEntity = row.ToEntity().CloneEntity(row.Metadata, new ColumnSet(true));
+
+                switch (aggregateType)
+                {
+                    case "Sum":
+
+                        sumTotal = resp.EntityCollection.Entities.Sum(x => (x[aggregateCol] as Money).Value);
+                        //var d = new Dictionary<string, object>();
+                        //d[attr.LogicalName]= sumTotal;
+                        //row.ApplyUpdates(d);
+                        row[attr.LogicalName] = sumTotal;
+                        if (!row.ColumnIsSet("transactioncurrencyid"))
+                        {
+                            var currencyRow = db["transactioncurrency"][baseCurrency.Id];
+                            row["transactioncurrencyid"] = currencyRow;
+                        }
+                        //updateEntity[attr.LogicalName] = new Money(sumTotal);
+                        break;
+
+                    case "Count":
+
+                        countTotal = resp.EntityCollection.Entities.Count;
+                        row[attr.LogicalName] = countTotal;
+                        break;
+
+                    default:
+                        throw new InvalidOperationException("aggregate type not recognised");
+                }
+
+                //var updateReq = new UpdateRequest();
+                //updateReq.Target = updateEntity;
+                //Execute(updateReq, AdminUserRef);
+
+                
             }
         }
 
