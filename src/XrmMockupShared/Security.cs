@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.ServiceModel;
+using System.Workflow.ComponentModel.Design;
 
 namespace DG.Tools.XrmMockup
 {
@@ -449,15 +450,22 @@ namespace DG.Tools.XrmMockup
 
         internal bool HasTeamMemberPermission(Entity entity, AccessRights access, EntityReference caller)
         {
-            if (!entity.Attributes.ContainsKey("ownerid") || caller.LogicalName != LogicalNames.SystemUser)
-                return false;
+            bool entityIsOrgOwned = false;
 
-            var owner = entity.GetAttributeValue<EntityReference>("ownerid");
+            if (!entity.Attributes.ContainsKey("ownerid")) //|| caller.LogicalName != LogicalNames.SystemUser)
+                entityIsOrgOwned = true;
 
-            // Check if owner is a team, and if user is member of that team, then check access for that team
-            if (owner.LogicalName == LogicalNames.Team && IsMemberOfTeam(owner, caller))
+            if (!entityIsOrgOwned)
             {
-                return HasPermission(entity, access, owner);
+                //only check owner id for user-owned records
+                var owner = entity.GetAttributeValue<EntityReference>("ownerid");
+
+                // Check if owner is a team, and if user is member of that team, then check access for that team
+                if (owner.LogicalName == LogicalNames.Team && IsMemberOfTeam(owner, caller))
+                {
+                    return HasPermission(entity, access, owner);
+                }
+
             }
 
             // Check if any teams that the user is a member of have access 
