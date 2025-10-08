@@ -15,6 +15,9 @@
     <Compile Include="$(MSBuildThisFileDirectory)MockupServiceAsync2.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)MockupServiceAsync.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)requests\ExecuteTransactionRequestHandler.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Requests\SetProcessRequestHandler.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Requests\RetrieveProcessInstancesRequestHandler.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Requests\QualifyLeadRequestHandler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Requests\PublishXmlRequestHandler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Serialization\DbDTO.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Serialization\OptionSetCollectionDTO.cs" />
