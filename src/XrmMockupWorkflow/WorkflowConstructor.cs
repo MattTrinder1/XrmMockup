@@ -506,6 +506,7 @@ namespace WorkflowExecuter
                 case "Maximum":
                 case "Minimum":
                 case "Average":
+                case "Count":
                     {
                         var parameters = CompressParameters(args[1].Value)
                             .Select(group => group.Split(',').Select(p => p.Replace("\"", string.Empty).Trim()).ToArray());
