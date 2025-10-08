@@ -76,6 +76,7 @@ namespace DG.Tools.XrmMockup.Metadata
             var securitySerializer = new DataContractSerializer(typeof(SecurityRole));
 
             var workflowsLocation = Path.Combine(outputLocation, "Workflows");
+            var businessProcessFlowsLocation = Path.Combine(outputLocation, "BusinessProcessFlows");
             var securityLocation = Path.Combine(outputLocation, "SecurityRoles");
             var entityLocation = Path.Combine(outputLocation, "Entities");
 
@@ -84,6 +85,12 @@ namespace DG.Tools.XrmMockup.Metadata
 
             Directory.CreateDirectory(workflowsLocation);
             foreach (var file in Directory.EnumerateFiles(workflowsLocation, "*.xml"))
+            {
+                File.Delete(file);
+            }
+
+            Directory.CreateDirectory(businessProcessFlowsLocation);
+            foreach (var file in Directory.EnumerateFiles(businessProcessFlowsLocation, "*.xml"))
             {
                 File.Delete(file);
             }
@@ -210,6 +217,16 @@ namespace DG.Tools.XrmMockup.Metadata
             {
                 var safeName = ToSafeName(workflow.GetAttributeValue<string>("name"));
                 using (var stream = new FileStream($"{workflowsLocation}/{safeName}.xml", FileMode.Create))
+                {
+                    workflowSerializer.WriteObject(stream, workflow);
+                }
+            }
+
+            Console.WriteLine("\tBusinessProcessFlows");
+            foreach (var workflow in generator.GetBusinessProcessFlows())
+            {
+                var safeName = ToSafeName(workflow.GetAttributeValue<string>("name"));
+                using (var stream = new FileStream($"{businessProcessFlowsLocation}/{safeName}.xml", FileMode.Create))
                 {
                     workflowSerializer.WriteObject(stream, workflow);
                 }
