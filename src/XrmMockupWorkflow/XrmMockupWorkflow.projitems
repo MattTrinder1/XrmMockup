@@ -12,7 +12,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)IWorkflowContext.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)NamespaceIgnoreXmlReader.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Parser.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)RollupParseStructure.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ParseStructure.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Utility.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)WorkflowConstructor.cs" />

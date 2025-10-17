@@ -6,9 +6,15 @@
     <Title>MetadataGenerator365</Title>
     <Company>Delegate</Company>
     <Description>Tool to generate early-bound .NET classes and enumerations for MS Dynamics 365/CRM server-side coding.</Description>
-    <Configurations>Debug;Release;XRMMOCKUP</Configurations>
+    <Configurations>Debug;Release;XRMMOCKUP;Test</Configurations>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;XRM_METADATA_365</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Test|AnyCPU'">
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>TRACE;DEBUG;XRM_METADATA_365</DefineConstants>
